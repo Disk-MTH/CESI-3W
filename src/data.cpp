@@ -1,8 +1,7 @@
-#include "Arduino.h"
 #include "dataTypes.cpp"
 #include "ChainableLED.h"
 
-LedStateData ledStateData[] = {
+static LedStateData ledStateData[] = {
         { // LED_STANDARD_MODE
                 new Color[1]{{0, 255, 0, 255}}, 1
         },
@@ -53,10 +52,10 @@ LedStateData ledStateData[] = {
         },
 };
 
-ChainableLED led = ChainableLED(2, 3, 1);
+static ChainableLED led = ChainableLED(2, 3, 1);
 
-Mode currentMode = STANDARD_MODE;
-Config config = Config();
-LedState currentState = LED_STANDARD_MODE;
+static Mode mode = STANDARD_MODE;
+static Config config = Config();
+static LedState ledState = LED_STANDARD_MODE;
 
-unsigned long lastLedTick = 0;
+static unsigned long lastLedTick = 0;

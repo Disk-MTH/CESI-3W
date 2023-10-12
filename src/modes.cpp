@@ -1,17 +1,17 @@
 #include "Arduino.h"
 
-void standardMode() {
+static void standardMode() {
 
 }
 
-void ecoMode() {
+static void ecoMode() {
 
 }
 
-void configMode() {
+static void configMode() {
 
 }
 
-void maintainMode() {
+static void maintainMode() {
 
 }

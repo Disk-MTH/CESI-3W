@@ -6,34 +6,36 @@
 void setup() {
     Serial.begin(9600);
     while (!Serial);
-    Serial.println("### 3W initialization ###");
+    Serial.println(F("### 3W initialization ###"));
 
     byte isConfigured;
     EEPROM.get(0, isConfigured);
 
     if (isConfigured == 136) {
-        Serial.println("A config exist in EEPROM, loading...");
+        Serial.println(F("A config exist in EEPROM, loading..."));
         EEPROM.get(1, config);
     } else {
-        Serial.println("No config in EEPROM, creating default...");
+        Serial.println(F("No config in EEPROM, creating default..."));
         EEPROM.put(0, 136);
         EEPROM.put(1, config);
     }
 
-    Serial.println("--- Config loaded ---");
+    Serial.println(F("--- Config ---"));
     Serial.println("Misc: " + String(config.logIntervalMin) + ", " + String(config.timeoutSec) + ", " + String(config.fileMaxSizeKo));
     Serial.println("Luminosity sensor: " + String(bool(config.lumSensorEnable)) + ", Low: " + String(config.lumSensorLow) + ", High: " + String(config.lumSensorHigh));
     Serial.println("Temperature sensor: " + String(bool(config.tempSensorEnable)) + ", Low: " + String(config.tempSensorLow) + ", High: " + String(config.tempSensorHigh));
     Serial.println("Humidity sensor: " + String(bool(config.humSensorEnable)) + ", Low: " + String(config.humSensorLow) + ", High: " + String(config.humSensorHigh));
-    Serial.println("--- End of config ---");
+    Serial.println(F("--- End of config ---"));
 
+    Serial.print(F("Initializing LED..."));
     led.init();
+    Serial.println(F("Done!"));
 
-    Serial.println("### Initialization done ###");
+    Serial.println(F("### Initialization done ###"));
 }
 
 void loop() {
-    switch (currentMode) {
+    switch (mode) {
         case STANDARD_MODE:
             standardMode();
             break;
@@ -49,19 +51,19 @@ void loop() {
     }
 
     if (millis() - lastLedTick > 1000) {
-        if (ledStateData[currentState].timeLeft == 0) {
-            led.setColorRGB(0, ledStateData[currentState].colors[ledStateData[currentState].colorIndex].red,
-                            ledStateData[currentState].colors[ledStateData[currentState].colorIndex].green,
-                            ledStateData[currentState].colors[ledStateData[currentState].colorIndex].blue);
+        if (ledStateData[ledState].timeLeft == 0) {
+            led.setColorRGB(0, ledStateData[ledState].colors[ledStateData[ledState].colorIndex].red,
+                            ledStateData[ledState].colors[ledStateData[ledState].colorIndex].green,
+                            ledStateData[ledState].colors[ledStateData[ledState].colorIndex].blue);
 
-            ledStateData[currentState].timeLeft = ledStateData[currentState].colors[ledStateData[currentState].colorIndex].durationSec;
+            ledStateData[ledState].timeLeft = ledStateData[ledState].colors[ledStateData[ledState].colorIndex].durationSec;
 
-            if (ledStateData[currentState].colorIndex == ledStateData[currentState].colorCount - 1)
-                ledStateData[currentState].colorIndex = 0;
+            if (ledStateData[ledState].colorIndex == ledStateData[ledState].colorCount - 1)
+                ledStateData[ledState].colorIndex = 0;
             else
-                ledStateData[currentState].colorIndex++;
+                ledStateData[ledState].colorIndex++;
         }
-        ledStateData[currentState].timeLeft--;
+        ledStateData[ledState].timeLeft--;
         lastLedTick = millis();
     }
 }
