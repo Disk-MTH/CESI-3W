@@ -1,5 +1,5 @@
 #include "Arduino.h"
-#include "../lib/ChainableLED/ChainableLED.h"
+#include "ChainableLED.h"
 
 enum LedState {
     STANDARD_MODE,
@@ -80,7 +80,7 @@ LedStateData ledStateData[] = {
 };
 
 ChainableLED led = ChainableLED(2, 3, 1);
-LedState currentState = SD_ERROR;
+LedState currentState = STANDARD_MODE;
 unsigned long lastLedTick = 0;
 
 void setup() {
