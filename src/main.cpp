@@ -1,30 +1,7 @@
 #include "Arduino.h"
 #include "EEPROM.h"
-
-enum Mode {
-    STANDARD_MODE,
-    CONFIG_MODE,
-    ECO_MODE,
-    REPAIR_MODE,
-};
-
-struct Config {
-    byte logIntervalMin = 10;
-    byte timeoutSec = 10;
-    byte fileMaxSizeKo = 2;
-    bool lumSensorEnable = true;
-    int lumSensorLow = 255;
-    int lumSensorHigh = 768;
-    bool tempSensorEnable = true;
-    int tempSensorLow = -10;
-    int tempSensorHigh = 60;
-    bool humSensorEnable = true;
-    int humSensorLow = 0;
-    int humSensorHigh = 50;
-};
-
-Mode currentMode = STANDARD_MODE;
-Config config = Config();
+#include "data.cpp"
+#include "modes.cpp"
 
 void setup() {
     Serial.begin(9600);
@@ -50,21 +27,42 @@ void setup() {
     Serial.println("Humidity sensor: " + String(bool(config.humSensorEnable)) + ", Low: " + String(config.humSensorLow) + ", High: " + String(config.humSensorHigh));
     Serial.println("--- End of config ---");
 
+    led.init();
+
     Serial.println("### Initialization done ###");
 }
 
 void loop() {
+    switch (currentMode) {
+        case STANDARD_MODE:
+            standardMode();
+            break;
+        case ECO_MODE:
+            configMode();
+            break;
+        case CONFIG_MODE:
+            ecoMode();
+            break;
+        case MAINTAIN_MODE:
+            maintainMode();
+            break;
+    }
 
+    if (millis() - lastLedTick > 1000) {
+        if (ledStateData[currentState].timeLeft == 0) {
+            led.setColorRGB(0, ledStateData[currentState].colors[ledStateData[currentState].colorIndex].red,
+                            ledStateData[currentState].colors[ledStateData[currentState].colorIndex].green,
+                            ledStateData[currentState].colors[ledStateData[currentState].colorIndex].blue);
+
+            ledStateData[currentState].timeLeft = ledStateData[currentState].colors[ledStateData[currentState].colorIndex].durationSec;
+
+            if (ledStateData[currentState].colorIndex == ledStateData[currentState].colorCount - 1)
+                ledStateData[currentState].colorIndex = 0;
+            else
+                ledStateData[currentState].colorIndex++;
+        }
+        ledStateData[currentState].timeLeft--;
+        lastLedTick = millis();
+    }
 }
 
-void standardMode() {
-
-}
-
-void configMode() {
-
-}
-
-void ecoMode() {
-
-}
