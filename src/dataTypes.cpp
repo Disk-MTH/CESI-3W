@@ -35,16 +35,23 @@ struct Config {
     int humSensorHigh = 50;
 };
 
+struct Button {
+    byte pin;
+    unsigned short durationMillis;
+    unsigned short millisLeft;
+    bool isPressed;
+};
+
 struct Color {
     byte red;
     byte green;
     byte blue;
-    byte durationSec;
+    unsigned short durationMillis;
 };
 
 struct LedStateData {
     Color* colors;
     byte colorCount;
     byte colorIndex;
-    long timeLeft;
+    unsigned short millisLeft;
 };

@@ -1,7 +1,7 @@
 #include "Arduino.h"
 #include "EEPROM.h"
-#include "data.cpp"
 #include "modes.cpp"
+#include "functionnal.cpp"
 
 void setup() {
     Serial.begin(9600);
@@ -27,6 +27,11 @@ void setup() {
     Serial.println("Humidity sensor: " + String(bool(config.humSensorEnable)) + ", Low: " + String(config.humSensorLow) + ", High: " + String(config.humSensorHigh));
     Serial.println(F("--- End of config ---"));
 
+    Serial.print(F("Initializing BUTTONS..."));
+    for (auto & button : buttons)
+        pinMode(button.pin, INPUT);
+    Serial.println(F("Done!"));
+
     Serial.print(F("Initializing LED..."));
     led.init();
     Serial.println(F("Done!"));
@@ -35,6 +40,11 @@ void setup() {
 }
 
 void loop() {
+    if (millis() - lastMillisTick > 0) {
+        everyMillis();
+        lastMillisTick = millis();
+    }
+
     switch (mode) {
         case STANDARD_MODE:
             standardMode();
@@ -49,22 +59,4 @@ void loop() {
             maintainMode();
             break;
     }
-
-    if (millis() - lastLedTick > 1000) {
-        if (ledStateData[ledState].timeLeft == 0) {
-            led.setColorRGB(0, ledStateData[ledState].colors[ledStateData[ledState].colorIndex].red,
-                            ledStateData[ledState].colors[ledStateData[ledState].colorIndex].green,
-                            ledStateData[ledState].colors[ledStateData[ledState].colorIndex].blue);
-
-            ledStateData[ledState].timeLeft = ledStateData[ledState].colors[ledStateData[ledState].colorIndex].durationSec;
-
-            if (ledStateData[ledState].colorIndex == ledStateData[ledState].colorCount - 1)
-                ledStateData[ledState].colorIndex = 0;
-            else
-                ledStateData[ledState].colorIndex++;
-        }
-        ledStateData[ledState].timeLeft--;
-        lastLedTick = millis();
-    }
 }
-
