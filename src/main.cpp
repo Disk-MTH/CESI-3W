@@ -1,7 +1,7 @@
 #include "Arduino.h"
 #include "EEPROM.h"
+#include "Wire.h"
 #include "modes.cpp"
-#include "functionnal.cpp"
 
 void setup() {
     Serial.begin(9600);
@@ -20,12 +20,8 @@ void setup() {
         EEPROM.put(1, config);
     }
 
-    Serial.println(F("--- Config ---"));
-    Serial.println("Misc: " + String(config.logIntervalMin) + ", " + String(config.timeoutSec) + ", " + String(config.fileMaxSizeKo));
-    Serial.println("Luminosity sensor: " + String(bool(config.lumSensorEnable)) + ", Low: " + String(config.lumSensorLow) + ", High: " + String(config.lumSensorHigh));
-    Serial.println("Temperature sensor: " + String(bool(config.tempSensorEnable)) + ", Low: " + String(config.tempSensorLow) + ", High: " + String(config.tempSensorHigh));
-    Serial.println("Humidity sensor: " + String(bool(config.humSensorEnable)) + ", Low: " + String(config.humSensorLow) + ", High: " + String(config.humSensorHigh));
-    Serial.println(F("--- End of config ---"));
+    logConfig();
+    Wire.begin();
 
     Serial.print(F("Initializing BUTTONS..."));
     for (auto & button : buttons)
@@ -36,27 +32,37 @@ void setup() {
     led.init();
     Serial.println(F("Done!"));
 
+    Serial.print(F("Initializing Bme280..."));
+    if (!bme.begin())
+        Serial.println(F("Failed!"));
+    Serial.println(F("Done!"));
+
     Serial.println(F("### Initialization done ###"));
+
+    if (digitalRead(buttons[1].pin) == LOW) {
+        Serial.println(F("Entering config mode..."));
+        mode = CONFIG_MODE;
+        ledState = LED_CONFIG_MODE;
+    }
 }
 
 void loop() {
     if (millis() - lastMillisTick > 0) {
         everyMillis();
+        switch (mode) {
+            case STANDARD_MODE:
+                standardMode();
+                break;
+            case ECO_MODE:
+                ecoMode();
+                break;
+            case CONFIG_MODE:
+                configMode();
+                break;
+            case MAINTAIN_MODE:
+                maintainMode();
+                break;
+        }
         lastMillisTick = millis();
-    }
-
-    switch (mode) {
-        case STANDARD_MODE:
-            standardMode();
-            break;
-        case ECO_MODE:
-            configMode();
-            break;
-        case CONFIG_MODE:
-            ecoMode();
-            break;
-        case MAINTAIN_MODE:
-            maintainMode();
-            break;
     }
 }

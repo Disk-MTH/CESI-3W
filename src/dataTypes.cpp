@@ -23,7 +23,7 @@ enum LedState {
 struct Config {
     byte logIntervalMin = 10;
     byte timeoutSec = 10;
-    byte fileMaxSizeKo = 2;
+    int fileMaxSizeO = 2;
     bool lumSensorEnable = true;
     int lumSensorLow = 255;
     int lumSensorHigh = 768;
