@@ -11,14 +11,11 @@ static void ecoMode() {
 
 }
 
-static unsigned long configAfkCount = 0;
-static bool askForPrompt = true;
-
 static void configMode() {
     if (configAfkCount > 1800000) {
         Serial.println(F("No activity for 30 minutes, exiting config mode..."));
         mode = STANDARD_MODE;
-        ledState = LED_STANDARD_MODE;
+        setLedState(LED_STANDARD_MODE);
         configAfkCount = 0;
         askForPrompt = true;
         return;
@@ -43,7 +40,7 @@ static void configMode() {
         if (command.startsWith(("EXIT"))) {
             Serial.println(F("Exiting config mode..."));
             mode = STANDARD_MODE;
-            ledState = LED_STANDARD_MODE;
+            setLedState(LED_STANDARD_MODE);
             isConfigCommand = false;
         } else if (command.startsWith(F("VERSION"))) {
             Serial.println(F("3W v1.0.0"));

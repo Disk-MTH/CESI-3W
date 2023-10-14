@@ -2,36 +2,18 @@
 #include "data.cpp"
 
 static void buttonPressed(Button button) {
-    //Serial.println("Button " + String(button.pin) + " pressed");
-}
-
-static void everyMillis() {
-    if (ledStateData[ledState].millisLeft == 0) {
-        led.setColorRGB(0, ledStateData[ledState].colors[ledStateData[ledState].colorIndex].red,
-                        ledStateData[ledState].colors[ledStateData[ledState].colorIndex].green,
-                        ledStateData[ledState].colors[ledStateData[ledState].colorIndex].blue);
-
-        ledStateData[ledState].millisLeft = ledStateData[ledState].colors[ledStateData[ledState].colorIndex].durationMillis;
-
-        if (ledStateData[ledState].colorIndex == ledStateData[ledState].colorCount - 1)
-            ledStateData[ledState].colorIndex = 0;
-        else
-            ledStateData[ledState].colorIndex++;
-    }
-    ledStateData[ledState].millisLeft--;
-
-    for (auto & button : buttons) {
-        if (digitalRead(button.pin) == LOW)
-            if (button.isPressed) {
-                if (button.millisLeft == 0)
-                    buttonPressed(button);
-                button.millisLeft--;
-            } else
-                button.isPressed = true;
-        else {
-            button.isPressed = false;
-            button.millisLeft = button.durationMillis;
-        }
+    switch (mode) {
+        case STANDARD_MODE:
+            Serial.println(F("Entering config mode..."));
+            mode = CONFIG_MODE;
+            ledState = LED_CONFIG_MODE;
+            break;
+        case ECO_MODE:
+            break;
+        case CONFIG_MODE:
+            break;
+        case MAINTAIN_MODE:
+            break;
     }
 }
 
@@ -42,6 +24,14 @@ static void logConfig() {
     Serial.println("Temperature sensor - Enable: " + String(bool(config.tempSensorEnable) ? "true" : "false") + ", Low: " + String(config.tempSensorLow) + ", High: " + String(config.tempSensorHigh));
     Serial.println("Humidity sensor - Enable: " + String(bool(config.humSensorEnable) ? "true" : "false") + ", Low: " + String(config.humSensorLow) + ", High: " + String(config.humSensorHigh));
     Serial.println(F("--- End of config ---"));
+}
+
+static void setLedState(LedState state) {
+    ledStateData[ledState].colorIndex = 0;
+    ledStateData[ledState].millisLeft = 0;
+    ledState = state;
+    ledStateData[ledState].colorIndex = 0;
+    ledStateData[ledState].millisLeft = 0;
 }
 
 static void readBme280() {

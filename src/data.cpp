@@ -66,3 +66,7 @@ static Config config = Config();
 static LedState ledState = LED_STANDARD_MODE;
 
 static unsigned long lastMillisTick = 0;
+static bool askForPrompt = true;
+
+static unsigned long lastMillisLog = 0;
+static unsigned long configAfkCount = 0;
