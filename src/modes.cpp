@@ -148,11 +148,20 @@ static void configMode() {
                 logClock(false, true, false);
             }
             isConfigCommand = false;
-        } else if (command == F("CLOCK=")) {
-
+        } else if (command.startsWith(("CLOCK="))) {
+            const long hour = command.substring(6, 8).toInt();
+            const long minute = command.substring(8, 10).toInt();
+            const long second = command.substring(10, 12).toInt();
+            if (hour >= 0 && hour < 24 && minute >= 0 && minute < 60 && second >= 0 && second < 60) {
+                clock.fillByHMS(hour, minute, second);
+                clock.setTime();
+                Serial.print(F("Time set to: "));
+                logClock(false, false, true);
+            } else
+                invalidValue = true;
+            isConfigCommand = false;
         } else
             invalidSyntax = true;
-
         if (isConfigCommand && !invalidSyntax && !invalidValue) {
             EEPROM.update(0, 136);
             EEPROM.put(1, config);
