@@ -32,6 +32,11 @@ void setup() {
     led.init();
     Serial.println(F("Done!"));
 
+    Serial.print(F("Initializing RTC..."));
+    clock.begin();
+    clock.setTime();
+    Serial.println(F("Done!"));
+
     Serial.print(F("Initializing Bme280..."));
     if (!bme.begin()) //TODO: Add error handling for sensors
         Serial.println(F("Failed!"));

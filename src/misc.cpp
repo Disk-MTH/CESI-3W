@@ -19,11 +19,49 @@ static void buttonPressed(Button button) {
 
 static void logConfig() {
     Serial.println(F("--- Config ---"));
-    Serial.println("Misc: " + String(config.logIntervalMin) + ", " + String(config.timeoutSec) + ", " + String(config.fileMaxSizeO));
+    Serial.println("Misc - Log interval: " + String(config.logIntervalMin) + ", Timout: " + String(config.timeoutSec) + ", Max file size: " + String(config.fileMaxSizeO));
     Serial.println("Luminosity sensor - Enable: " + String(bool(config.lumSensorEnable) ? "true" : "false") + ", Low: " + String(config.lumSensorLow) + ", High: " + String(config.lumSensorHigh));
     Serial.println("Temperature sensor - Enable: " + String(bool(config.tempSensorEnable) ? "true" : "false") + ", Low: " + String(config.tempSensorLow) + ", High: " + String(config.tempSensorHigh));
     Serial.println("Humidity sensor - Enable: " + String(bool(config.humSensorEnable) ? "true" : "false") + ", Low: " + String(config.humSensorLow) + ", High: " + String(config.humSensorHigh));
     Serial.println(F("--- End of config ---"));
+}
+
+static void logClock(bool date, bool day, bool hour) {
+    clock.getTime();
+    if (day) {
+        switch (clock.dayOfWeek) {
+            case MON:
+                Serial.print(F("Monday"));
+                break;
+            case TUE:
+                Serial.print(F("Tuesday"));
+                break;
+            case WED:
+                Serial.print(F("Wednesday"));
+                break;
+            case THU:
+                Serial.print(F("Thursday"));
+                break;
+            case FRI:
+                Serial.print(F("Friday"));
+                break;
+            case SAT:
+                Serial.print(F("Saturday"));
+                break;
+            case SUN:
+                Serial.print(F("Sunday"));
+                break;
+            case 0:
+                Serial.print(F("N/A"));
+                break;
+        }
+        Serial.print(" ");
+    }
+    if (date)
+        Serial.print(String(clock.dayOfMonth) + "/" + String(clock.month) + "/" + String(clock.year + 2000) + " ");
+    if (hour)
+        Serial.print(String(clock.hour) + "h" + String(clock.minute) + "m" + String(clock.second) + "s");
+    Serial.println();
 }
 
 static void setLedState(LedState state) {

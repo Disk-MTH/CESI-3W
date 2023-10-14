@@ -3,8 +3,15 @@
 #include "limits.h"
 #include "misc.cpp"
 
+
+static unsigned long lastlog = 0;
+
 static void standardMode() {
     //readBme280();
+    if (millis() - lastlog > 1000) {
+        logClock(true, true, true);
+        lastlog = millis();
+    }
 }
 
 static void ecoMode() {
@@ -31,11 +38,12 @@ static void configMode() {
 
     if (Serial.available() > 0) {
         const String command = Serial.readStringUntil('\n');
+        Serial.println(command);
         configAfkCount = 0;
         askForPrompt = true;
         bool isConfigCommand = true;
-        bool invalidValueRange = false;
-        bool invalidCommandSyntax = false;
+        bool invalidValue = false;
+        bool invalidSyntax = false;
 
         if (command.startsWith(("EXIT"))) {
             Serial.println(F("Exiting config mode..."));
@@ -48,61 +56,43 @@ static void configMode() {
         } else if (command.startsWith(("RESET"))) {
             Serial.println(F("Resetting config..."));
             config = Config();
-        } else if (command.startsWith(("LOG_INTERVAL=")))
-            if (command.length() > 13) {
+        } else if (command.startsWith(("LOG_INTERVAL="))) {
                 const long value = command.substring(13).toInt();
                 if (value > 0 && value < 256)
                     config.logIntervalMin = value;
                 else
-                    invalidValueRange = true;
-            } else
-                invalidCommandSyntax = true;
-        else if (command.startsWith(F("TIMEOUT=")))
-            if (command.length() > 8) {
-                const long value = command.substring(9).toInt();
-                if (value > 0 && value < 256)
-                    config.timeoutSec = value;
-                else
-                    invalidValueRange = true;
-            } else
-                invalidCommandSyntax = true;
-        else if (command.startsWith(F("FILE_MAX_SIZE=")))
-            if (command.length() > 14) {
-                const long value = command.substring(15).toInt();
-                if (value > 0 && value < INT_MAX)
-                    config.fileMaxSizeO = (int) value;
-                else
-                    invalidValueRange = true;
-            } else
-                invalidCommandSyntax = true;
-        else if (command.startsWith(F("LUMIN=")))
-            if (command.length() > 6) {
-                const long value = command.substring(6).toInt();
-                if (value >= 0 && value <= 1)
-                    config.lumSensorEnable = (bool) value;
-                else
-                    invalidValueRange = true;
-            } else
-                invalidCommandSyntax = true;
-        else if (command.startsWith(("LUMIN_LOW=")))
-            if (command.length() > 10) {
-                const long value = command.substring(10).toInt();
-                if (value > 0 && value < 1024)
-                    config.lumSensorLow = (int) value;
-                else
-                    invalidValueRange = true;
-            } else
-                invalidCommandSyntax = true;
-        else if (command.startsWith(("LUMIN_HIGH=")))
-            if (command.length() > 11) {
-                const long value = command.substring(11).toInt();
-                if (value > 0 && value < 1024)
-                    config.lumSensorHigh = (int) value;
-                else
-                    invalidValueRange = true;
-            } else
-                invalidCommandSyntax = true;
-        else if (command == F("TEMP_AIR=")) {
+                    invalidValue = true;
+        } else if (command.startsWith(F("TIMEOUT="))) {
+            const long value = command.substring(8).toInt();
+            if (value > 0 && value < 256)
+                config.timeoutSec = value;
+            else
+                invalidValue = true;
+        } else if (command.startsWith(F("FILE_MAX_SIZE="))) {
+            const long value = command.substring(14).toInt();
+            if (value > 0 && value < INT_MAX)
+                config.fileMaxSizeO = (int) value;
+            else
+                invalidValue = true;
+        } else if (command.startsWith(F("LUMIN="))) {
+            const long value = command.substring(6).toInt();
+            if (value >= 0 && value <= 1)
+                config.lumSensorEnable = (bool) value;
+            else
+                invalidValue = true;
+        } else if (command.startsWith(("LUMIN_LOW="))) {
+            const long value = command.substring(10).toInt();
+            if (value > 0 && value < 1024)
+                config.lumSensorLow = (int) value;
+            else
+                invalidValue = true;
+        } else if (command.startsWith(("LUMIN_HIGH="))) {
+            const long value = command.substring(11).toInt();
+            if (value > 0 && value < 1024)
+                config.lumSensorHigh = (int) value;
+            else
+                invalidValue = true;
+        } else if (command == F("TEMP_AIR=")) {
 
         } else if (command == F("MIN_TEMP_AIR=")) {
 
@@ -120,23 +110,57 @@ static void configMode() {
 
         } else if (command == F("PRESSURE_MAX=")) {
 
-        } else if (command == F("DATE=")) {
+        } else if (command.startsWith(("DATE="))) {
+            const long day = command.substring(5, 7).toInt();
+            const long month = command.substring(7, 9).toInt();
+            const long year = command.substring(9, 13).toInt();
+            if (day > 0 && day < 32 && month > 0 && month < 13 && year > 1999 && year < 3000) {
+                clock.fillByYMD(year, month, day);
+                clock.setTime();
+                Serial.print(F("Date set to: "));
+                logClock(true, false, false);
+            } else
+                invalidValue = true;
+            isConfigCommand = false;
+        } else if (command.startsWith(("DAY="))) {
+            const String day = command.substring(4);
 
-        } else if (command == F("DAY=")) {
+            if (day.startsWith("MON"))
+                clock.dayOfWeek = MON;
+            else if (day.startsWith("TUE"))
+                clock.dayOfWeek = TUE;
+            else if (day.startsWith("WED"))
+                clock.dayOfWeek = WED;
+            else if (day.startsWith("THU"))
+                clock.dayOfWeek = THU;
+            else if (day.startsWith("FRI"))
+                clock.dayOfWeek = FRI;
+            else if (day.startsWith("SAT"))
+                clock.dayOfWeek = SAT;
+            else if (day.startsWith("SUN"))
+                clock.dayOfWeek = SUN;
+            else
+                invalidValue = true;
 
+            if (!invalidValue) {
+                clock.setTime();
+                Serial.print(F("Day set to: "));
+                logClock(false, true, false);
+            }
+            isConfigCommand = false;
         } else if (command == F("CLOCK=")) {
 
         } else
-            invalidCommandSyntax = true;
+            invalidSyntax = true;
 
-        if (isConfigCommand &&!invalidCommandSyntax && !invalidValueRange) {
+        if (isConfigCommand && !invalidSyntax && !invalidValue) {
             EEPROM.update(0, 136);
             EEPROM.put(1, config);
             logConfig();
-        } else if (invalidCommandSyntax)
+        } else if (invalidSyntax)
             Serial.println(F("Invalid command syntax! Check the documentation"));
-        else if (invalidValueRange)
-            Serial.println(F("Invalid value range! Check the documentation"));
+        else if (invalidValue)
+            Serial.println(F("Invalid value! Check the documentation"));
     }
 }
 

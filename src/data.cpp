@@ -1,6 +1,7 @@
 #include "limits.h"
 #include "dataTypes.cpp"
 #include "ChainableLED.h"
+#include "DS1307.h"
 #include "BME280I2C.h"
 
 static LedStateData ledStateData[] = {
@@ -59,6 +60,7 @@ static Button buttons[] = {
         {5, 3000},
 };
 static ChainableLED led = ChainableLED(2, 3, 1);
+static DS1307 clock;
 static BME280I2C bme;
 
 static Mode mode = STANDARD_MODE;
