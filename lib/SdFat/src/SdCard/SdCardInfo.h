@@ -277,7 +277,7 @@ typedef struct CID {
   /** Product revision - n.m two 4-bit nibbles. */
   uint8_t prv;
   // byte 9-12
-  /** Product minSerial 32-bit number Big Endian format. */
+  /** Product serial 32-bit number Big Endian format. */
   uint8_t psn8[4];
   // byte 13-14
   /** Manufacturing date big endian - four nibbles RYYM Reserved Year Month. */

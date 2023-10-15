@@ -5,23 +5,30 @@
 
 void standardMode() {
     if (millis() - lastMillisLog > 1000/*config.logIntervalMin * 60000*/) {
-        //logClock(true, true, true);
-        if (logFile.open("A.txt", FILE_WRITE)) {
-            logFile.println(clock.second);
+        const String date = getFormattedDate(true, false, false);
+        const String fileName = date + "_0.txt";
+        if (logFile.open(fileName.c_str(), FILE_WRITE)) {
+            if (logFile.fileSize() > 250/*config.fileMaxSizeKo * 1024*/) {
+                int index = 1;
+                while (sd.exists(date + "_" + index + ".txt"))
+                    index++;
+
+                const String newFileName = date + "_" + index + ".txt";
+
+                serial.print(F("Log file is full, archiving to "));
+                serial.print(newFileName);
+                serial.println(F("..."));
+
+                if (logFile.rename(newFileName.c_str()))
+                    serial.println(F("Done!"));
+                else
+                    serial.println(F("Failed!"));
+            }
+
+            logFile.println(getFormattedDate(true, true, true));
             logFile.close();
         } else
-            minSerial.println(F("open failed"));
-        //logFile = SD.open(String(clock.year) + "_" + String(clock.month) + "_" + String(clock.dayOfMonth) + "_0", FILE_WRITE);
-        /*logFile = SD.open("datalog.txt", FILE_WRITE);
-
-        if (logFile) {
-            logFile.println(clock.second);
-
-            Serial.println(logFile.size());
-            logFile.close();
-        }
-        else
-            Serial.println(F("Error while opening file for writing!"));*/
+            serial.println(F("Failed to open log file!"));
 
         lastMillisLog = millis();
     }
@@ -33,7 +40,7 @@ void ecoMode() {
 
 void configMode() {
     if (configAfkCount > 1800000) {
-        Serial.println(F("No activity for 30 minutes, exiting config mode..."));
+        serial.println(F("No activity for 30 minutes, exiting config mode..."));
         mode = STANDARD_MODE;
         setLedState(LED_STANDARD_MODE);
         configAfkCount = 0;
@@ -44,14 +51,21 @@ void configMode() {
     configAfkCount++;
 
     if (askForPrompt) {
-        while (Serial.available() > 0) Serial.read();
-        Serial.println(F("Enter a command:"));
+        while (serial.available() > 0) serial.read();
+        serial.println(F("Enter a command:"));
         askForPrompt = false;
     }
 
-    if (Serial.available() > 0) {
-        const String command = Serial.readStringUntil('\n');
-        Serial.println(command);
+    if (serial.available() > 0) {
+        String command;
+        while (serial.available() > 0) {
+            char c = (char) serial.read();
+            if (c == '\n' || c == '\r')
+                break;
+            command += c;
+        }
+
+        serial.println(command);
         configAfkCount = 0;
         askForPrompt = true;
         bool isConfigCommand = true;
@@ -59,15 +73,15 @@ void configMode() {
         bool invalidSyntax = false;
 
         if (command.startsWith((F("EXIT")))) {
-            Serial.println(F("Exiting config mode..."));
+            serial.println(F("Exiting config mode..."));
             mode = STANDARD_MODE;
             setLedState(LED_STANDARD_MODE);
             isConfigCommand = false;
         } else if (command.startsWith(F("VERSION"))) {
-            Serial.println(F("3W v1.0.0"));
+            serial.println(F("3W v1.0.0"));
             isConfigCommand = false;
         } else if (command.startsWith((F("RESET")))) {
-            Serial.println(F("Resetting config..."));
+            serial.println(F("Resetting config..."));
             config = Config();
         } else if (command.startsWith((F("LOG_INTERVAL=")))) {
                 const byte value = (byte) command.substring(13).toInt();
@@ -130,8 +144,8 @@ void configMode() {
             if (day > 0 && day < 32 && month > 0 && month < 13 && year > 1999 && year < 2100) {
                 //clock.fillByYMD(year, month, day);
                 //clock.setTime();
-                Serial.print(F("Date set to: "));
-                logClock(true, false, false);
+                serial.print(F("Date set to: "));
+                logClock(serial, true, false, false);
             } else
                 invalidValue = true;
             isConfigCommand = false;
@@ -157,8 +171,8 @@ void configMode() {
 
             if (!invalidValue) {
                 clock.setTime();
-                Serial.print(F("Day set to: "));
-                logClock(false, true, false);
+                serial.print(F("Day set to: "));
+                logClock(serial, false, true, false);
             }
             isConfigCommand = false;
         } else if (command.startsWith((F("CLOCK=")))) {
@@ -168,29 +182,23 @@ void configMode() {
             if (hour >= 0 && hour < 24 && minute >= 0 && minute < 60 && second >= 0 && second < 60) {
                 clock.fillByHMS(hour, minute, second);
                 clock.setTime();
-                Serial.print(F("Time set to: "));
-                logClock(false, false, true);
+                serial.print(F("Time set to: "));
+                logClock(serial, false, false, true);
             } else
                 invalidValue = true;
             isConfigCommand = false;
         } else
             invalidSyntax = true;
         if (isConfigCommand && !invalidSyntax && !invalidValue) {
-            EEPROM.update(0, 136);
+            EEPROM.update(0, 135);
             EEPROM.put(1, config);
             logConfig();
         } else if (invalidSyntax)
-            Serial.println(F("Invalid command syntax! Check the documentation"));
+            serial.println(F("Invalid command syntax! Check the documentation"));
         else if (invalidValue)
-            Serial.println(F("Invalid value! Check the documentation"));
+            serial.println(F("Invalid value! Check the documentation"));
     }
 }
 
-static bool d = false;
-
 void maintainMode() {
-    if (!d) {
-        closeSD();
-        d = true;
-    }
 }

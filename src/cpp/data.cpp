@@ -1,9 +1,9 @@
 #include "headers/data.h"
 
-MinimumSerial minSerial;
+MinimumSerial serial;
 Button buttons[] = {
-        {4, 1000},
-        {5, 3000},
+        {4},
+        {5},
 };
 SdFat sd;
 SdFile logFile;
@@ -14,12 +14,6 @@ BME280I2C bme;
 Mode mode = STANDARD_MODE;
 Config config = Config();
 LedState ledState = LED_STANDARD_MODE;
-
-unsigned long lastMillisTick = 0;
-unsigned long lastMillisLog = 0;
-unsigned long configAfkCount = 0;
-bool askForPrompt = true;
-
 LedStateData ledStateData[] = {
         { // LED_STANDARD_MODE
                 new Color[1]{{0, 255, 0, USHRT_MAX}}, 1
@@ -70,3 +64,10 @@ LedStateData ledStateData[] = {
                 }, 2
         },
 };
+
+bool isSdInit = false;
+bool isBmeInit = false;
+unsigned long lastMillisTick = 0;
+unsigned long lastMillisLog = 0;
+unsigned long configAfkCount = 0;
+bool askForPrompt = true;

@@ -123,7 +123,7 @@ class SdioCard : public SdCardInterface {
   bool readSectors(uint32_t sector, uint8_t* dst, size_t ns);
   /**
    * Read a card's CID register. The CID contains card identification
-   * information such as Manufacturer ID, Product name, Product minSerial
+   * information such as Manufacturer ID, Product name, Product serial
    * number and Manufacturing date.
    *
    * \param[out] cid pointer to area for returned data.

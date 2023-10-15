@@ -32,19 +32,19 @@
 //==============================================================================
 /**
  * \class MinimumSerial
- * \brief mini minSerial class for the %SdFat library.
+ * \brief mini serial class for the %SdFat library.
  */
 class MinimumSerial : public print_t {
  public:
-  /** \return true for hardware minSerial */
+  /** \return true for hardware serial */
   operator bool() {return true;}
   /**
    * \return one if data is available.
    */
   int available();
   /**
-   * Set baud rate for minSerial port zero and enable in non interrupt mode.
-   * Do not call this function if you use another minSerial library.
+   * Set baud rate for serial port zero and enable in non interrupt mode.
+   * Do not call this function if you use another serial library.
    * \param[in] baud rate
    */
   void begin(uint32_t baud);

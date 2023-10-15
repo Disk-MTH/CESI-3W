@@ -5,52 +5,57 @@
 #include "Wire.h"
 
 void setup() {
-    minSerial.begin(9600);
-    while (!minSerial);
-    minSerial.println(F("### 3W initialization ###"));
+    serial.begin(9600);
+    while (!serial);
+    serial.println(F("### 3W initialization ###"));
 
     byte isConfigured;
     EEPROM.get(0, isConfigured);
 
-    if (isConfigured == 136) {
-        minSerial.println(F("A config exist in EEPROM, loading..."));
+    if (isConfigured == 135) {
+        serial.println(F("A config exist in EEPROM, loading..."));
         EEPROM.get(1, config);
     } else {
-        minSerial.println(F("No config in EEPROM, creating default..."));
-        EEPROM.put(0, 136);
+        serial.println(F("No config in EEPROM, creating default..."));
+        EEPROM.put(0, 135);
         EEPROM.put(1, config);
     }
 
     logConfig();
     Wire.begin();
 
-    minSerial.print(F("Initializing BUTTONS..."));
+    serial.print(F("Initializing BUTTONS..."));
     for (auto & button : buttons)
         pinMode(button.pin, INPUT);
-    minSerial.println(F("Done!"));
+    serial.println(F("Done!"));
 
-    bool initSd = initSD();//TODO: Add error handling for sensors
+    while (!isSdInit) {
+        initSD();
+        delay(5000);
+    }
 
-    minSerial.print(F("Initializing LED..."));
+    serial.print(F("Initializing LED..."));
     led.init();
-    minSerial.println(F("Done!"));
+    serial.println(F("Done!"));
 
-    minSerial.print(F("Initializing RTC..."));
+    serial.print(F("Initializing RTC..."));
     clock.begin();
     clock.setTime();
-    minSerial.println(F("Done!"));
+    serial.println(F("Done!"));
 
     bme.begin();
-    minSerial.print(F("Initializing Bme280..."));
-    if (!bme.begin()) //TODO: Add error handling for sensors
-        minSerial.println(F("Failed!"));
-    else
-        minSerial.println(F("Done!"));
+    serial.print(F("Initializing Bme280..."));
+    if (!bme.begin())
+        serial.println(F("Failed!"));
+    else {
+        isBmeInit = true;
+        serial.println(F("Done!"));
+    }
 
-    minSerial.println(F("### Initialization done ###"));
+    serial.println(F("### Initialization done ###"));
 
     if (digitalRead(buttons[1].pin) == LOW) {
-        minSerial.println(F("Entering config mode..."));
+        serial.println(F("Entering config mode..."));
         mode = CONFIG_MODE;
         setLedState(LED_CONFIG_MODE);
     }
@@ -74,15 +79,10 @@ void loop() {
 
         for (auto & button : buttons) {
             if (digitalRead(button.pin) == LOW)
-                if (button.isPressed) {
-                    if (button.millisLeft == 0)
-                        buttonPressed(button);
-                    button.millisLeft--;
-                } else
-                    button.isPressed = true;
-            else {
-                button.isPressed = false;
-                button.millisLeft = button.durationMillis;
+                button.pressDuration++;
+            else if (button.pressDuration > 0) {
+                buttonPressed(button, button.pressDuration);
+                button.pressDuration = 0;
             }
         }
 
@@ -101,7 +101,6 @@ void loop() {
                 break;
         }
 
-        clock.getTime();
         lastMillisTick = millis();
     }
 }

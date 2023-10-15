@@ -8,7 +8,7 @@
 #include "DS1307.h"
 #include "BME280I2C.h"
 
-extern MinimumSerial minSerial;
+extern MinimumSerial serial;
 extern Button buttons[2];
 extern SdFat sd;
 extern SdFile logFile;
@@ -19,12 +19,15 @@ extern BME280I2C bme;
 extern Mode mode;
 extern Config config;
 extern LedState ledState;
+extern LedStateData ledStateData[10];
 
+extern bool isSdInit;
+extern bool isBmeInit;
 extern unsigned long lastMillisTick;
 extern unsigned long lastMillisLog;
 extern unsigned long configAfkCount;
 extern bool askForPrompt;
 
-extern LedStateData ledStateData[10];
+
 
 #endif //WWW_DATA_H

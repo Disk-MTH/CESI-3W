@@ -40,9 +40,7 @@ struct Config {
 
 struct Button {
     byte pin;
-    unsigned short durationMillis;
-    unsigned short millisLeft;
-    bool isPressed;
+    unsigned short pressDuration;
 };
 
 struct Color {
