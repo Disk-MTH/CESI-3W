@@ -1,3 +1,6 @@
+#ifndef WWW_DATATYPES_H
+#define WWW_DATATYPES_H
+
 #include "Arduino.h"
 
 enum Mode {
@@ -23,7 +26,7 @@ enum LedState {
 struct Config {
     byte logIntervalMin = 10;
     byte timeoutSec = 10;
-    int fileMaxSizeO = 2;
+    byte fileMaxSizeKo = 2;
     bool lumSensorEnable = true;
     int lumSensorLow = 255;
     int lumSensorHigh = 768;
@@ -55,3 +58,5 @@ struct LedStateData {
     byte colorIndex;
     unsigned short millisLeft;
 };
+
+#endif //WWW_DATATYPES_H

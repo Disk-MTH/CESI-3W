@@ -1,21 +1,22 @@
-#include "Arduino.h"
+#include "headers/data.h"
+#include "headers/modes.h"
+#include "headers/misc.h"
 #include "EEPROM.h"
 #include "Wire.h"
-#include "modes.cpp"
 
 void setup() {
-    Serial.begin(9600);
-    while (!Serial);
-    Serial.println(F("### 3W initialization ###"));
+    minSerial.begin(9600);
+    while (!minSerial);
+    minSerial.println(F("### 3W initialization ###"));
 
     byte isConfigured;
     EEPROM.get(0, isConfigured);
 
     if (isConfigured == 136) {
-        Serial.println(F("A config exist in EEPROM, loading..."));
+        minSerial.println(F("A config exist in EEPROM, loading..."));
         EEPROM.get(1, config);
     } else {
-        Serial.println(F("No config in EEPROM, creating default..."));
+        minSerial.println(F("No config in EEPROM, creating default..."));
         EEPROM.put(0, 136);
         EEPROM.put(1, config);
     }
@@ -23,32 +24,38 @@ void setup() {
     logConfig();
     Wire.begin();
 
-    Serial.print(F("Initializing BUTTONS..."));
-    for (auto & button : buttons)
-        pinMode(button.pin, INPUT);
-    Serial.println(F("Done!"));
+    minSerial.print(F("Initializing BUTTONS..."));
+    /*for (auto & button : buttons)
+        pinMode(button.pin, INPUT);*/
+    minSerial.println(F("Done!"));
 
-    Serial.print(F("Initializing LED..."));
+    bool initSd = initSD();//TODO: Add error handling for sensors
+
+    minSerial.print(F("Initializing LED..."));
     led.init();
-    Serial.println(F("Done!"));
+    minSerial.println(F("Done!"));
 
-    Serial.print(F("Initializing RTC..."));
+    minSerial.print(F("Initializing RTC..."));
     clock.begin();
     clock.setTime();
-    Serial.println(F("Done!"));
+    minSerial.println(F("Done!"));
 
-    Serial.print(F("Initializing Bme280..."));
+    bme.begin();
+    minSerial.print(F("Initializing Bme280..."));
     if (!bme.begin()) //TODO: Add error handling for sensors
-        Serial.println(F("Failed!"));
-    Serial.println(F("Done!"));
+        minSerial.println(F("Failed!"));
+    else
+        minSerial.println(F("Done!"));
 
-    Serial.println(F("### Initialization done ###"));
+    minSerial.println(F("### Initialization done ###"));
 
     if (digitalRead(buttons[1].pin) == LOW) {
-        Serial.println(F("Entering config mode..."));
+        minSerial.println(F("Entering config mode..."));
         mode = CONFIG_MODE;
         setLedState(LED_CONFIG_MODE);
     }
+
+    closeSD();
 }
 
 void loop() {
@@ -67,7 +74,7 @@ void loop() {
         }
         ledStateData[ledState].millisLeft--;
 
-        for (auto & button : buttons) {
+        /*for (auto & button : buttons) {
             if (digitalRead(button.pin) == LOW)
                 if (button.isPressed) {
                     if (button.millisLeft == 0)
@@ -79,7 +86,7 @@ void loop() {
                 button.isPressed = false;
                 button.millisLeft = button.durationMillis;
             }
-        }
+        }*/
 
         switch (mode) {
             case STANDARD_MODE:
@@ -95,6 +102,40 @@ void loop() {
                 maintainMode();
                 break;
         }
+
+        clock.getTime();
         lastMillisTick = millis();
     }
 }
+
+//RAM:   [======    ]  58.3% (used 1193 bytes from 2048 bytes)
+//Flash: [====      ]  41.0% (used 13230 bytes from 32256 bytes)
+
+//SdCard SdFile
+//RAM:   [===       ]  29.1% (used 595 bytes from 2048 bytes)
+//Flash: [====      ]  37.0% (used 11928 bytes from 32256 bytes)
+
+//SdFat SdFile
+//RAM:   [======    ]  58.3% (used 1193 bytes from 2048 bytes)
+//Flash: [====      ]  41.0% (used 13238 bytes from 32256 bytes)
+
+/*#include "headers/data.h"
+#include "headers/misc.h"
+
+void setup() {
+    minminSerial.begin(9600);
+    minminSerial.println(F("init"));
+
+    if (!initSD())
+        return;
+
+    if (logFile.open("A.txt", FILE_WRITE)) {
+        logFile.println(123);
+        logFile.close();
+    } else
+        minminSerial.println(F("open failed"));
+
+    closeSD();
+    minminSerial.println(F("done"));
+}
+void loop() {}*/

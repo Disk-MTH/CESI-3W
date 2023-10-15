@@ -1,10 +1,26 @@
-#include "limits.h"
-#include "dataTypes.cpp"
-#include "ChainableLED.h"
-#include "DS1307.h"
-#include "BME280I2C.h"
+#include "headers/data.h"
 
-static LedStateData ledStateData[] = {
+MinimumSerial minSerial;
+Button buttons[] = {
+        {4, 1000},
+        {5, 3000},
+};
+SdFat sd;
+SdFile logFile;
+ChainableLED led = ChainableLED(2, 3, 1);
+DS1307 clock;
+BME280I2C bme;
+
+Mode mode = STANDARD_MODE;
+Config config = Config();
+LedState ledState = LED_STANDARD_MODE;
+
+unsigned long lastMillisTick = 0;
+unsigned long lastMillisLog = 0;
+unsigned long configAfkCount = 0;
+bool askForPrompt = true;
+
+LedStateData ledStateData[] = {
         { // LED_STANDARD_MODE
                 new Color[1]{{0, 255, 0, USHRT_MAX}}, 1
         },
@@ -54,21 +70,3 @@ static LedStateData ledStateData[] = {
                 }, 2
         },
 };
-
-static Button buttons[] = {
-        {4, 1000},
-        {5, 3000},
-};
-static ChainableLED led = ChainableLED(2, 3, 1);
-static DS1307 clock;
-static BME280I2C bme;
-
-static Mode mode = STANDARD_MODE;
-static Config config = Config();
-static LedState ledState = LED_STANDARD_MODE;
-
-static unsigned long lastMillisTick = 0;
-static bool askForPrompt = true;
-
-static unsigned long lastMillisLog = 0;
-static unsigned long configAfkCount = 0;
