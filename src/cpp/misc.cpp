@@ -4,13 +4,16 @@
 void initSD() {
     if (isSdInit) return;
 
-    serial.print(F("Initializing SD card..."));
-    if (!sd.begin(4)) {
-        isSdInit = false;
-        serial.println(F("Failed!"));
-    } else {
-        isSdInit = true;
-        serial.println(F("Done!"));
+    while (!isSdInit) {
+        serial.print(F("Initializing SD card..."));
+        if (!sd.begin(4)) {
+            isSdInit = false;
+            serial.println(F("Failed!"));
+            delay(5000);
+        } else {
+            isSdInit = true;
+            serial.println(F("Done!"));
+        }
     }
 }
 
@@ -105,7 +108,7 @@ void logConfig() {
     serial.println(F("--- End of config ---"));
 }
 
-String getFormattedDate(bool date, bool day, bool hour) {
+String getFormattedDate(bool day, bool date, bool hour) {
     clock.getTime();
     String formattedDate = "";
     if (day) {
@@ -156,8 +159,4 @@ String getFormattedDate(bool date, bool day, bool hour) {
         formattedDate += F("s");
     }
     return formattedDate;
-}
-
-void logClock(print_t &outputStream, bool date, bool day, bool hour) {
-    outputStream.println(getFormattedDate(date, day, hour));
 }

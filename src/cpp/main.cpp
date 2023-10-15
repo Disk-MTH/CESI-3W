@@ -29,10 +29,7 @@ void setup() {
         pinMode(button.pin, INPUT);
     serial.println(F("Done!"));
 
-    while (!isSdInit) {
-        initSD();
-        delay(5000);
-    }
+    initSD();
 
     serial.print(F("Initializing LED..."));
     led.init();

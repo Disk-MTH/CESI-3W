@@ -5,7 +5,7 @@
 
 void standardMode() {
     if (millis() - lastMillisLog > 1000/*config.logIntervalMin * 60000*/) {
-        const String date = getFormattedDate(true, false, false);
+        const String date = getFormattedDate(false, true, false);
         const String fileName = date + "_0.txt";
         if (logFile.open(fileName.c_str(), FILE_WRITE)) {
             if (logFile.fileSize() > 250/*config.fileMaxSizeKo * 1024*/) {
@@ -145,7 +145,7 @@ void configMode() {
                 //clock.fillByYMD(year, month, day);
                 //clock.setTime();
                 serial.print(F("Date set to: "));
-                logClock(serial, true, false, false);
+                serial.println(getFormattedDate(false, true, false));
             } else
                 invalidValue = true;
             isConfigCommand = false;
@@ -172,7 +172,7 @@ void configMode() {
             if (!invalidValue) {
                 clock.setTime();
                 serial.print(F("Day set to: "));
-                logClock(serial, false, true, false);
+                serial.println(getFormattedDate(true, false, false));
             }
             isConfigCommand = false;
         } else if (command.startsWith((F("CLOCK=")))) {
@@ -183,7 +183,7 @@ void configMode() {
                 clock.fillByHMS(hour, minute, second);
                 clock.setTime();
                 serial.print(F("Time set to: "));
-                logClock(serial, false, false, true);
+                serial.println(getFormattedDate(false, false, true));
             } else
                 invalidValue = true;
             isConfigCommand = false;
