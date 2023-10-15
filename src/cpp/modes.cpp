@@ -4,8 +4,13 @@
 #include "EEPROM.h"
 
 void standardMode() {
-    if (millis() - lastMillisLog > 5000/*config.logIntervalMin * 60000*/) {
-        logClock(true, true, true);
+    if (millis() - lastMillisLog > 1000/*config.logIntervalMin * 60000*/) {
+        //logClock(true, true, true);
+        if (logFile.open("A.txt", FILE_WRITE)) {
+            logFile.println(clock.second);
+            logFile.close();
+        } else
+            minSerial.println(F("open failed"));
         //logFile = SD.open(String(clock.year) + "_" + String(clock.month) + "_" + String(clock.dayOfMonth) + "_0", FILE_WRITE);
         /*logFile = SD.open("datalog.txt", FILE_WRITE);
 

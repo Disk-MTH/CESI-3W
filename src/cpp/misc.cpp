@@ -43,8 +43,8 @@ void readBme280() {
     }
 }
 
-void buttonPressed(Button button) {
-    switch (mode) {
+void buttonPressed(Button button, unsigned short pressDuration) {
+    /*switch (mode) {
         case STANDARD_MODE:
             if (button.pin == buttons[0].pin) {
                 minSerial.println(F("Entering maintenance mode..."));
@@ -66,7 +66,12 @@ void buttonPressed(Button button) {
             setLedState(LED_STANDARD_MODE);
             initSD();
             break;
-    }
+    }*/
+
+    minSerial.print(F("Button "));
+    minSerial.print(button.pin);
+    minSerial.print(F(" pressed for "));
+    minSerial.print(pressDuration);
 }
 
 void logConfig() {

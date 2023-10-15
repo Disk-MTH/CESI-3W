@@ -9,7 +9,7 @@
 #include "BME280I2C.h"
 
 extern MinimumSerial minSerial;
-extern Button buttons[];
+extern Button buttons[2];
 extern SdFat sd;
 extern SdFile logFile;
 extern ChainableLED led;
@@ -25,6 +25,6 @@ extern unsigned long lastMillisLog;
 extern unsigned long configAfkCount;
 extern bool askForPrompt;
 
-extern LedStateData ledStateData[];
+extern LedStateData ledStateData[10];
 
 #endif //WWW_DATA_H

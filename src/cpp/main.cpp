@@ -25,8 +25,8 @@ void setup() {
     Wire.begin();
 
     minSerial.print(F("Initializing BUTTONS..."));
-    /*for (auto & button : buttons)
-        pinMode(button.pin, INPUT);*/
+    for (auto & button : buttons)
+        pinMode(button.pin, INPUT);
     minSerial.println(F("Done!"));
 
     bool initSd = initSD();//TODO: Add error handling for sensors
@@ -54,8 +54,6 @@ void setup() {
         mode = CONFIG_MODE;
         setLedState(LED_CONFIG_MODE);
     }
-
-    closeSD();
 }
 
 void loop() {
@@ -74,7 +72,7 @@ void loop() {
         }
         ledStateData[ledState].millisLeft--;
 
-        /*for (auto & button : buttons) {
+        for (auto & button : buttons) {
             if (digitalRead(button.pin) == LOW)
                 if (button.isPressed) {
                     if (button.millisLeft == 0)
@@ -86,7 +84,7 @@ void loop() {
                 button.isPressed = false;
                 button.millisLeft = button.durationMillis;
             }
-        }*/
+        }
 
         switch (mode) {
             case STANDARD_MODE:
@@ -107,35 +105,3 @@ void loop() {
         lastMillisTick = millis();
     }
 }
-
-//RAM:   [======    ]  58.3% (used 1193 bytes from 2048 bytes)
-//Flash: [====      ]  41.0% (used 13230 bytes from 32256 bytes)
-
-//SdCard SdFile
-//RAM:   [===       ]  29.1% (used 595 bytes from 2048 bytes)
-//Flash: [====      ]  37.0% (used 11928 bytes from 32256 bytes)
-
-//SdFat SdFile
-//RAM:   [======    ]  58.3% (used 1193 bytes from 2048 bytes)
-//Flash: [====      ]  41.0% (used 13238 bytes from 32256 bytes)
-
-/*#include "headers/data.h"
-#include "headers/misc.h"
-
-void setup() {
-    minminSerial.begin(9600);
-    minminSerial.println(F("init"));
-
-    if (!initSD())
-        return;
-
-    if (logFile.open("A.txt", FILE_WRITE)) {
-        logFile.println(123);
-        logFile.close();
-    } else
-        minminSerial.println(F("open failed"));
-
-    closeSD();
-    minminSerial.println(F("done"));
-}
-void loop() {}*/
