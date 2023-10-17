@@ -67,7 +67,7 @@ void SdSpiArduinoDriver::send(const uint8_t* buf, size_t count) {
   if (count > 512) {
     return;
   }
-  // Not easy to avoid receive so use tmp RX buffer.
+  // Not easy to avoid receive so use tmp RX gpsBuffer.
   uint8_t rxBuf[512];
   // Discard const - STM32 not const correct.
   m_spi->transfer(const_cast<uint8_t*>(buf), rxBuf, count);

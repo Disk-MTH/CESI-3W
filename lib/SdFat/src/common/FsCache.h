@@ -53,7 +53,7 @@ class FsCache {
   static const uint8_t CACHE_RESERVE_FOR_WRITE =
     CACHE_STATUS_DIRTY | CACHE_OPTION_NO_READ;
   //----------------------------------------------------------------------------
-  /** \return Cache buffer address. */
+  /** \return Cache gpsBuffer address. */
   uint8_t* cacheBuffer() {
     return m_buffer;
   }

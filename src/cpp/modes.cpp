@@ -3,29 +3,42 @@
 #include "headers/misc.h"
 #include "EEPROM.h"
 
-void standardMode() {
-    if (millis() - lastMillisLog > 1000/*config.logIntervalMin * 60000*/) {
-        const String date = getFormattedDate(false, true, false);
-        const String fileName = date + "_0.txt";
+void standardMode(bool eco) {
+    const unsigned long currentMillis = millis();
+    if (currentMillis - lastMillisLog > 1000/*config.logIntervalMin * 60000 * (eco ? 2 : 1)*/) {
+        const String date = getRTC(false, true, false);
+        const String fileName = date + "_0.csv";
         if (logFile.open(fileName.c_str(), FILE_WRITE)) {
-            if (logFile.fileSize() > 250/*config.fileMaxSizeKo * 1024*/) {
+            if (logFile.fileSize() == 0)
+                logFile.println(F("hour,temp,hum,pressure,luminosity,gps"));
+
+            logFile.print(getRTC(false, false, true));
+            logFile.print(F(","));
+            logFile.print(getBME());
+            logFile.print(F(","));
+            logFile.print(analogRead(A0));
+            logFile.println(F(","));
+            //logFile.println(gpsBuffer);
+
+            serial.println("@@@@");
+            serial.println(gps);
+
+            if (logFile.fileSize() > config.fileMaxSizeKo * 1024) {
                 int index = 1;
-                while (sd.exists(date + "_" + index + ".txt"))
+                while (sd.exists(date + "_" + index + ".csv"))
                     index++;
 
-                const String newFileName = date + "_" + index + ".txt";
+                const String newFileName = date + "_" + index + ".csv";
 
-                serial.print(F("Log file is full, archiving to "));
+                serial.print(F("Archiving to "));
                 serial.print(newFileName);
                 serial.println(F("..."));
 
                 if (logFile.rename(newFileName.c_str()))
-                    serial.println(F("Done!"));
+                    serial.println(DONE);
                 else
-                    serial.println(F("Failed!"));
+                    serial.println(FAILED);
             }
-
-            logFile.println(getFormattedDate(true, true, true));
             logFile.close();
         } else
             serial.println(F("Failed to open log file!"));
@@ -34,13 +47,9 @@ void standardMode() {
     }
 }
 
-void ecoMode() {
-
-}
-
 void configMode() {
     if (configAfkCount > 1800000) {
-        serial.println(F("No activity for 30 minutes, exiting config mode..."));
+        serial.println(F("AFK for 30 minutes, exiting config mode"));
         mode = STANDARD_MODE;
         setLedState(LED_STANDARD_MODE);
         configAfkCount = 0;
@@ -73,7 +82,7 @@ void configMode() {
         bool invalidSyntax = false;
 
         if (command.startsWith((F("EXIT")))) {
-            serial.println(F("Exiting config mode..."));
+            serial.println(F("Exiting config mode"));
             mode = STANDARD_MODE;
             setLedState(LED_STANDARD_MODE);
             isConfigCommand = false;
@@ -81,7 +90,7 @@ void configMode() {
             serial.println(F("3W v1.0.0"));
             isConfigCommand = false;
         } else if (command.startsWith((F("RESET")))) {
-            serial.println(F("Resetting config..."));
+            serial.println(F("Resetting config"));
             config = Config();
         } else if (command.startsWith((F("LOG_INTERVAL=")))) {
                 const byte value = (byte) command.substring(13).toInt();
@@ -119,33 +128,34 @@ void configMode() {
                 config.lumSensorHigh = (short) value;
             else
                 invalidValue = true;
-        } else if (command == F("TEMP_AIR=")) {
+        } else if (command.startsWith(F("TEMP_AIR="))) {
 
-        } else if (command == F("MIN_TEMP_AIR=")) {
 
-        } else if (command == F("MAX_TEMP_AIR=")) {
+        } else if (command.startsWith((F("MIN_TEMP_AIR="))) {
 
-        } else if (command == F("HYGR=")) {
+        } else if (command.startsWith((F("MAX_TEMP_AIR="))) {
 
-        } else if (command == F("HYGR_MIN=")) {
+        } else if (command.startsWith((F("HYGR="))) {
 
-        } else if (command == F("HYGR_MAX=")) {
+        } else if (command.startsWith((F("HYGR_MIN="))) {
 
-        } else if (command == F("PRESSURE=")) {
+        } else if (command.startsWith((F("HYGR_MAX="))) {
 
-        } else if (command == F("PRESSURE_MIN=")) {
+        } else if (command.startsWith((F("PRESSURE="))) {
 
-        } else if (command == F("PRESSURE_MAX=")) {
+        } else if (command.startsWith((F("PRESSURE_MIN="))) {
+
+        } else if (command.startsWith((F("PRESSURE_MAX="))) {
 
         } else if (command.startsWith((F("DATE=")))) {
             const byte day = (byte) command.substring(5, 7).toInt();
             const byte month = (byte) command.substring(7, 9).toInt();
             const short year = (short) command.substring(9, 13).toInt();
             if (day > 0 && day < 32 && month > 0 && month < 13 && year > 1999 && year < 2100) {
-                //clock.fillByYMD(year, month, day);
-                //clock.setTime();
+                clock.fillByYMD(year, month, day);
+                clock.setTime();
                 serial.print(F("Date set to: "));
-                serial.println(getFormattedDate(false, true, false));
+                serial.println(getRTC(false, true, false));
             } else
                 invalidValue = true;
             isConfigCommand = false;
@@ -153,26 +163,26 @@ void configMode() {
             const String day = command.substring(4);
 
             if (day.startsWith(F("MON")))
-                clock.dayOfWeek = MON;
+                clock.fillDayOfWeek(MON);
             else if (day.startsWith(F("TUE")))
-                clock.dayOfWeek = TUE;
+                clock.fillDayOfWeek(TUE);
             else if (day.startsWith(F("WED")))
-                clock.dayOfWeek = WED;
+                clock.fillDayOfWeek(WED);
             else if (day.startsWith(F("THU")))
-                clock.dayOfWeek = THU;
+                clock.fillDayOfWeek(THU);
             else if (day.startsWith(F("FRI")))
-                clock.dayOfWeek = FRI;
+                clock.fillDayOfWeek(FRI);
             else if (day.startsWith(F("SAT")))
-                clock.dayOfWeek = SAT;
+                clock.fillDayOfWeek(SAT);
             else if (day.startsWith(F("SUN")))
-                clock.dayOfWeek = SUN;
+                clock.fillDayOfWeek(SUN);
             else
                 invalidValue = true;
 
             if (!invalidValue) {
                 clock.setTime();
                 serial.print(F("Day set to: "));
-                serial.println(getFormattedDate(true, false, false));
+                serial.println(getRTC(true, false, false));
             }
             isConfigCommand = false;
         } else if (command.startsWith((F("CLOCK=")))) {
@@ -183,7 +193,7 @@ void configMode() {
                 clock.fillByHMS(hour, minute, second);
                 clock.setTime();
                 serial.print(F("Time set to: "));
-                serial.println(getFormattedDate(false, false, true));
+                serial.println(getRTC(false, false, true));
             } else
                 invalidValue = true;
             isConfigCommand = false;
@@ -194,9 +204,9 @@ void configMode() {
             EEPROM.put(1, config);
             logConfig();
         } else if (invalidSyntax)
-            serial.println(F("Invalid command syntax! Check the documentation"));
+            serial.println(F("Invalid syntax!"));
         else if (invalidValue)
-            serial.println(F("Invalid value! Check the documentation"));
+            serial.println(F("Invalid value!"));
     }
 }
 

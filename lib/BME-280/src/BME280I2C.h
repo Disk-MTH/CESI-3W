@@ -24,7 +24,7 @@ This code is licensed under the GNU LGPL and is open for ditrbution
 and copying in accordance with the license.
 This header must be included in any derived code or copies of the code.
 
-Based on the data sheet provided by Bosch for the BME-280 environmental sensor.
+Based on the data sheet provided by Bosch for the Bme280 environmental sensor.
  */
 
 #ifndef TG_BME_280_I2C_H

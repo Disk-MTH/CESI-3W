@@ -36,7 +36,7 @@ class FatFormatter {
    * Format a FAT volume.
    *
    * \param[in] dev Block device for volume.
-   * \param[in] secBuffer buffer for writing to volume.
+   * \param[in] secBuffer gpsBuffer for writing to volume.
    * \param[in] pr Print device for progress output.
    *
    * \return true for success or false for failure.

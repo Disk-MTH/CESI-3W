@@ -230,7 +230,7 @@ const uint32_t CARD_STATUS_ERASE_RESET = 1UL << 13;
 const uint32_t CARD_STATUS_CURRENT_STATE = 0XF << 9;
 /** Shift for current state. */
 const uint32_t CARD_STATUS_CURRENT_STATE_SHIFT = 9;
-/** Corresponds to buffer empty signaling on the bus. */
+/** Corresponds to gpsBuffer empty signaling on the bus. */
 const uint32_t CARD_STATUS_READY_FOR_DATA = 1UL << 8;
 // bit 7 reserved.
 /** Extension Functions may set this bit to get host to deal with events. */

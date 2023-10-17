@@ -90,7 +90,7 @@ class FatPartition {
     return m_sectorsPerFat;
   }
   /** Clear the cache and returns a pointer to the cache.  Not for normal apps.
-   * \return A pointer to the cache buffer or zero if an error occurs.
+   * \return A pointer to the cache gpsBuffer or zero if an error occurs.
    */
   uint8_t* cacheClear() {
     return m_cache.clear();
@@ -108,7 +108,7 @@ class FatPartition {
     return m_dataStartSector;
   }
   /** End access to volume
-   * \return pointer to sector size buffer for format.
+   * \return pointer to sector size gpsBuffer for format.
    */
   uint8_t* end() {
     m_fatType = 0;

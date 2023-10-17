@@ -230,7 +230,7 @@ class ostream : public virtual ios {
   }
 //  ostream& write(char *str, streamsize count);
   /**
-   * Flushes the buffer associated with this stream. The flush function
+   * Flushes the gpsBuffer associated with this stream. The flush function
    * calls the sync function of the associated file.
    * \return A reference to the ostream object.
    */

@@ -3,12 +3,17 @@
 
 #include "dataTypes.h"
 #include "MinimumSerial.h"
+#include "SoftwareSerial.h"
 #include "SdFat.h"
 #include "ChainableLED.h"
 #include "DS1307.h"
 #include "BME280I2C.h"
 
+#define DONE F("Done!")
+#define FAILED F("Failed!")
+
 extern MinimumSerial serial;
+extern SoftwareSerial gpsSerial;
 extern Button buttons[2];
 extern SdFat sd;
 extern SdFile logFile;
@@ -23,11 +28,11 @@ extern LedStateData ledStateData[10];
 
 extern bool isSdInit;
 extern bool isBmeInit;
+extern String gps;
 extern unsigned long lastMillisTick;
 extern unsigned long lastMillisLog;
 extern unsigned long configAfkCount;
 extern bool askForPrompt;
-
-
+extern bool missingDataForLog;
 
 #endif //WWW_DATA_H

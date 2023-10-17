@@ -7,9 +7,9 @@
 void initSD();
 void closeSD();
 void setLedState(LedState state);
-void readBme280();
+String getRTC(bool day, bool date, bool hour);
+String getBME();
 void buttonPressed(Button button, unsigned short pressDuration);
 void logConfig();
-String getFormattedDate(bool day, bool date, bool hour);
 
 #endif //WWW_MISC_H

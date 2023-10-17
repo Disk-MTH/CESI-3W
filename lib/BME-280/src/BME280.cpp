@@ -22,7 +22,7 @@ Last Updated: Oct 07 2017.
 
 This header must be included in any derived code or copies of the code.
 
-Based on the data sheet provided by Bosch for the BME-280 environmental sensor,
+Based on the data sheet provided by Bosch for the Bme280 environmental sensor,
 calibration code based on algorithms providedBosch, some unit conversations courtesy
 of www.endmemo.com, altitude equation courtesy of NOAA, and dew point equation
 courtesy of Brian McNoldy at http://andrew.rsmas.miami.edu.
@@ -71,7 +71,7 @@ bool BME280::Initialize()
 /****************************************************************/
 void BME280::InitializeFilter()
 {
-  // Force an unfiltered measurement to populate the filter buffer.
+  // Force an unfiltered measurement to populate the filter gpsBuffer.
   // This fixes a bug that causes the first read to always be 28.82 °C 81732.34 hPa.
   Filter filter = m_settings.filter;
   m_settings.filter = Filter_Off;
@@ -149,6 +149,14 @@ bool BME280::begin
    success &= m_initialized;
 
    return success;
+}
+
+/****************************************************************/
+bool BME280::reset()
+{
+   WriteRegister(RESET_ADDR, RESET_VALUE);
+   delay(2); //max. startup time according to datasheet
+   return(begin());
 }
 
 /****************************************************************/
@@ -274,8 +282,8 @@ float BME280::CalculateHumidity
    uint8_t   dig_H1 =   m_dig[24];
    int16_t dig_H2 = (m_dig[26] << 8) | m_dig[25];
    uint8_t   dig_H3 =   m_dig[27];
-   int16_t dig_H4 = (m_dig[28] << 4) | (0x0F & m_dig[29]);
-   int16_t dig_H5 = (m_dig[30] << 4) | ((m_dig[29] >> 4) & 0x0F);
+   int16_t dig_H4 = ((int8_t)m_dig[28] * 16) | (0x0F & m_dig[29]);
+   int16_t dig_H5 = ((int8_t)m_dig[30] * 16) | ((m_dig[29] >> 4) & 0x0F);
    int8_t   dig_H6 =   m_dig[31];
 
    var1 = (t_fine - ((int32_t)76800));
@@ -340,6 +348,9 @@ float BME280::CalculatePressure
          break;
       case PresUnit_bar: /* bar */
          final /= 100000.0;               /* final pa * 1 bar/100kPa */
+         break;
+      case PresUnit_mbar: /* mbar */
+         final /= 100.0;               /* final pa * 1 bar/100Pa */
          break;
       case PresUnit_torr: /* torr */
          final /= 133.32236534674;            /* final pa * 1 torr/133.32236534674Pa */

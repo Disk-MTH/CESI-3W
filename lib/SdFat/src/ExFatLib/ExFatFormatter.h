@@ -35,7 +35,7 @@ class ExFatFormatter {
    * Format an exFAT volume.
    *
    * \param[in] dev Block device for volume.
-   * \param[in] secBuf buffer for writing to volume.
+   * \param[in] secBuf gpsBuffer for writing to volume.
    * \param[in] pr Print device for progress output.
    *
    * \return true for success or false for failure.

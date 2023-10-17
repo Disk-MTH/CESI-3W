@@ -293,7 +293,7 @@ char *fmtDouble(char *str, double num, uint8_t prec, bool altFmt) {
 //------------------------------------------------------------------------------
 /** Print a number followed by a field terminator.
  * \param[in] value The number to be printed.
- * \param[in] ptr Pointer to last char in buffer.
+ * \param[in] ptr Pointer to last char in gpsBuffer.
  * \param[in] prec Number of digits after decimal point.
  * \param[in] expChar Use exp format if non zero.
  * \return Pointer to first character of result.

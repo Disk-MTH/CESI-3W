@@ -109,7 +109,7 @@ class FsVolume {
            m_xVol ? m_xVol->clusterHeapStartSector() : 0;
   }
   /** End access to volume
-   * \return pointer to sector size buffer for format.
+   * \return pointer to sector size gpsBuffer for format.
    */
   uint8_t* end() {
     m_fVol = nullptr;

@@ -6,17 +6,19 @@
 
 void setup() {
     serial.begin(9600);
+    gpsSerial.begin(9600);
+    gpsSerial.listen();
     while (!serial);
-    serial.println(F("### 3W initialization ###"));
+    serial.println(F("### 3W ###"));
 
     byte isConfigured;
     EEPROM.get(0, isConfigured);
 
     if (isConfigured == 135) {
-        serial.println(F("A config exist in EEPROM, loading..."));
+        serial.println(F("Load config from EEPROM..."));
         EEPROM.get(1, config);
     } else {
-        serial.println(F("No config in EEPROM, creating default..."));
+        serial.println(F("Create default config..."));
         EEPROM.put(0, 135);
         EEPROM.put(1, config);
     }
@@ -24,42 +26,47 @@ void setup() {
     logConfig();
     Wire.begin();
 
-    serial.print(F("Initializing BUTTONS..."));
-    for (auto & button : buttons)
+    serial.print(F("BUTTONS..."));
+    for (auto &button: buttons)
         pinMode(button.pin, INPUT);
-    serial.println(F("Done!"));
+    serial.println(DONE);
 
     initSD();
 
-    serial.print(F("Initializing LED..."));
+    serial.print(F("LED..."));
     led.init();
-    serial.println(F("Done!"));
+    serial.println(DONE);
 
-    serial.print(F("Initializing RTC..."));
+    serial.print(F("RTC..."));
     clock.begin();
     clock.setTime();
-    serial.println(F("Done!"));
+    serial.println(DONE);
 
-    bme.begin();
-    serial.print(F("Initializing Bme280..."));
+    serial.print(F("BME..."));
     if (!bme.begin())
-        serial.println(F("Failed!"));
+        serial.println(FAILED);
     else {
         isBmeInit = true;
-        serial.println(F("Done!"));
+        serial.println(DONE);
     }
 
-    serial.println(F("### Initialization done ###"));
+    serial.println(F("### Finish ###"));
 
     if (digitalRead(buttons[1].pin) == LOW) {
-        serial.println(F("Entering config mode..."));
+        serial.println(F("Config mode"));
         mode = CONFIG_MODE;
         setLedState(LED_CONFIG_MODE);
     }
 }
 
 void loop() {
-    if (millis() - lastMillisTick > 0) {
+    if (gpsSerial.available() > 0 && gps.length() == 0) {
+        const String data = gpsSerial.readStringUntil('\n');
+        if (data.startsWith("$GPGGA"))
+            gps = data;
+    }
+
+    if (millis() - lastMillisTick > 1000) {
         if (ledStateData[ledState].millisLeft == 0) {
             led.setColorRGB(0, ledStateData[ledState].colors[ledStateData[ledState].colorIndex].red,
                             ledStateData[ledState].colors[ledStateData[ledState].colorIndex].green,
@@ -85,10 +92,10 @@ void loop() {
 
         switch (mode) {
             case STANDARD_MODE:
-                standardMode();
+                standardMode(false);
                 break;
             case ECO_MODE:
-                ecoMode();
+                standardMode(true);
                 break;
             case CONFIG_MODE:
                 configMode();

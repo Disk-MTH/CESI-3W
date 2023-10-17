@@ -1,6 +1,7 @@
 #include "headers/data.h"
 
 MinimumSerial serial;
+SoftwareSerial gpsSerial(5, 6);
 Button buttons[] = {
         {4},
         {5},
@@ -67,7 +68,9 @@ LedStateData ledStateData[] = {
 
 bool isSdInit = false;
 bool isBmeInit = false;
+String gps = "";
 unsigned long lastMillisTick = 0;
 unsigned long lastMillisLog = 0;
 unsigned long configAfkCount = 0;
 bool askForPrompt = true;
+bool missingDataForLog = false;

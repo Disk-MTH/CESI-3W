@@ -31,11 +31,11 @@
 #include <limits.h>
 #include "ios.h"
 //------------------------------------------------------------------------------
-/** Total size of stream buffer. The entire buffer is used for output.
+/** Total size of stream gpsBuffer. The entire gpsBuffer is used for output.
   * During input UNGETC_BUF_SIZE of this space is reserved for ungetc.
   */
 const uint8_t STREAM_BUF_SIZE = 64;
-/** Amount of buffer allocated for ungetc during input. */
+/** Amount of gpsBuffer allocated for ungetc during input. */
 const uint8_t UNGETC_BUF_SIZE = 2;
 //------------------------------------------------------------------------------
 // Get rid of any macros defined in <stdio.h>.

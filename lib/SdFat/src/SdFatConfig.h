@@ -59,9 +59,9 @@
 // For minimum flash size use these settings:
 #define USE_FAT_FILE_FLAG_CONTIGUOUS 0
 #define ENABLE_DEDICATED_SPI 0
-// #define USE_LONG_FILE_NAMES 0
+#define USE_LONG_FILE_NAMES 0
 #define SDFAT_FILE_TYPE 1
-// #define CHECK_FLASH_PROGRAMMING 0  // May cause SD to sleep at high current.
+//#define CHECK_FLASH_PROGRAMMING 0  // May cause SD to sleep at high current.
 //
 // Options can be set in a makefile or an IDE like platformIO
 // if they are in a #ifndef/#endif block below.
@@ -144,7 +144,7 @@
 /**
  * If USE_SPI_ARRAY_TRANSFER is non-zero and the standard SPI library is
  * use, the array transfer function, transfer(buf, size), will be used.
- * This option will allocate up to a 512 byte temporary buffer for send.
+ * This option will allocate up to a 512 byte temporary gpsBuffer for send.
  * This may be faster for some boards.  Do not use this with AVR boards.
  */
 #ifndef USE_SPI_ARRAY_TRANSFER
@@ -347,10 +347,10 @@ typedef uint8_t SdCsPin_t;
  * The standard for iostreams is to call flush.  This is very costly for
  * SdFat.  Each call to flush causes 2048 bytes of I/O to the SD.
  *
- * SdFat has a single 512 byte buffer for SD I/O so it must write the current
+ * SdFat has a single 512 byte gpsBuffer for SD I/O so it must write the current
  * data sector to the SD, read the directory sector from the SD, update the
  * directory entry, write the directory sector to the SD and read the data
- * sector back into the buffer.
+ * sector back into the gpsBuffer.
  *
  * The SD flash memory controller is not designed for this many rewrites
  * so performance may be reduced by more than a factor of 100.
