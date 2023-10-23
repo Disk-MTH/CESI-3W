@@ -7,8 +7,9 @@
 void initSD();
 void closeSD();
 void setLedState(LedState state);
-String getRTC(bool day, bool date, bool hour);
-String getBME();
+void logData(Print& outputStream);
+String getRTC(bool date, bool hour);
+String getBME(bool temp, bool hum, bool pres);
 void buttonPressed(Button button, unsigned short pressDuration);
 void logConfig();
 

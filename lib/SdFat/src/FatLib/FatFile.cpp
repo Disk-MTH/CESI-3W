@@ -470,6 +470,7 @@ bool FatFile::open(FatFile* dirFile, const char* path, oflag_t oflag) {
   while (1) {
     if (!parsePathName(path, &fname, &path)) {
       DBG_FAIL_MACRO;
+      //TODO: error
       goto fail;
     }
     if (*path == 0) {
@@ -970,10 +971,10 @@ bool FatFile::rename(FatFile* dirFile, const char* newPath) {
   sync();
   oldFile = *this;
   dir = cacheDirEntry(FsCache::CACHE_FOR_READ);
-  if (!dir) {
+  /*if (!dir) {
     DBG_FAIL_MACRO;
     goto fail;
-  }
+  }*/
   // save directory entry
   memcpy(&entry, dir, sizeof(entry));
   // make directory entry for new path
@@ -982,7 +983,7 @@ bool FatFile::rename(FatFile* dirFile, const char* newPath) {
       DBG_FAIL_MACRO;
       goto fail;
     }
-  } else {
+  }/* else { //DISK_MTH
     // don't create missing path prefix components
     if (!file.mkdir(dirFile, newPath, false)) {
       DBG_FAIL_MACRO;
@@ -990,7 +991,7 @@ bool FatFile::rename(FatFile* dirFile, const char* newPath) {
     }
     // save cluster containing new dot dot
     dirCluster = file.m_firstCluster;
-  }
+  }*/
   // change to new directory entry
 
   m_dirSector = file.m_dirSector;

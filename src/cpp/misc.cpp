@@ -5,14 +5,14 @@ void initSD() {
     if (isSdInit) return;
 
     while (!isSdInit) {
-        serial.print(F("SD card..."));
+        Serial.print(F("SD card..."));
         if (!sd.begin(4)) {
             isSdInit = false;
-            serial.println(FAILED);
+            Serial.println(FAILED);
             delay(5000);
         } else {
             isSdInit = true;
-            serial.println(DONE);
+            Serial.println(DONE);
         }
     }
 }
@@ -22,7 +22,7 @@ void closeSD() {
 
     sd.end();
     isSdInit = false;
-    serial.println(F("SD card closed!"));
+    Serial.println(F("SD card closed!"));
 }
 
 void setLedState(LedState state) {
@@ -31,99 +31,101 @@ void setLedState(LedState state) {
     ledState = state;
 }
 
-String getRTC(bool day, bool date, bool hour) {
+void logData(Print& outputStream) {
+    outputStream.print(getRTC(false, true));
+    outputStream.print(SEMI);
+    outputStream.print(getBME(config.tempSensorEnable, config.humSensorEnable, config.presSensorEnable));
+    outputStream.print(SEMI);
+    outputStream.print(analogRead(A0));
+    outputStream.print(SEMI);
+    outputStream.println(gps);
+}
+
+String getRTC(bool date, bool hour) {
     clock.getTime();
     String result = "";
-    if (day) {
-        switch (clock.dayOfWeek) {
-            case MON:
-                result += F("Monday");
-                break;
-            case TUE:
-                result += F("Tuesday");
-                break;
-            case WED:
-                result += F("Wednesday");
-                break;
-            case THU:
-                result += F("Thursday");
-                break;
-            case FRI:
-                result += F("Friday");
-                break;
-            case SAT:
-                result += F("Saturday");
-                break;
-            case SUN:
-                result += F("Sunday");
-                break;
-            case 0:
-                result += F("N/A");
-                break;
-        }
-    }
     if (date) {
-        if (day) result += F(" ");
-
         result += clock.dayOfMonth;
-        result += F("-");
         result += clock.month;
-        result += F("-");
-        result += clock.year;
+        result += (clock.year);
 
         if (hour) result += F(" ");
     }
     if (hour) {
         result += clock.hour;
-        result += F("h");
         result += clock.minute;
-        result += F("m");
         result += clock.second;
-        result += F("s");
     }
     return result;
 }
 
-String getBME() {
-    float temp(NAN), hum(NAN), pres(NAN);
-    bme.read(pres, temp, hum, BME280::TempUnit_Celsius, BME280::PresUnit_hPa);
+String getBME(bool temp, bool hum, bool pres) {
+    float tempV(NAN), humV(NAN), presV(NAN);
+    bme.read(presV, tempV, humV, BME280::TempUnit_Celsius, BME280::PresUnit_hPa);
     String result = "";
 
-    if (isnan(temp) || isnan(hum) || isnan(pres)) {
-        serial.println(F("Failed to read BME!"));
-        result += F("0,0,0");
-    }
-    else {
-        result += String(temp);
-        result += F(",");
-        result += String(hum);
-        result += F(",");
-        result += String(pres);
-    }
+    if (isnan(tempV) || isnan(humV) || isnan(presV))
+        setLedState(LED_SENSOR_ERROR);
+
+    if (!temp) {
+        result += NA;
+        result += SEMI;
+    } else
+        if (tempV < config.tempSensorLow || tempV > config.tempSensorHigh)
+            setLedState(LED_INVALID_SENSOR_DATA);
+        else {
+            result += String(tempV);
+            result += SEMI;
+        }
+
+    if (!hum) {
+        result += NA;
+        result += SEMI;
+    } else
+        if (humV < config.humSensorLow || humV > config.humSensorHigh)
+            setLedState(LED_INVALID_SENSOR_DATA);
+        else {
+            result += String(humV);
+            result += SEMI;
+        }
+
+    if (!pres)
+        result += NA;
+    else
+        if (presV < config.pressSensorLow || presV > config.pressSensorHigh)
+            setLedState(LED_INVALID_SENSOR_DATA);
+        else
+            result += String(presV);
+
     return result;
 }
 
 void buttonPressed(Button button, unsigned short pressDuration) {
     switch (mode) {
         case STANDARD_MODE:
-            if (button.pin == buttons[0].pin) { //TODO: Remove this temp code
-                serial.println(F("Config mode"));
-                mode = CONFIG_MODE;
-                setLedState(LED_CONFIG_MODE);
+            if (button.pin == buttons[0].pin && pressDuration >= 5000) {
+                Serial.println(F("Eco mode"));
+                mode = ECO_MODE;
+                setLedState(LED_ECO_MODE);
             } else if (button.pin == buttons[1].pin && pressDuration >= 5000) {
-                serial.println(F("Maintenance mode"));
+                Serial.println(F("Maintenance mode"));
                 mode = MAINTAIN_MODE;
                 setLedState(LED_MAINTAIN_MODE);
                 closeSD();
             }
             break;
         case ECO_MODE:
+            if (button.pin == buttons[1].pin && pressDuration >= 5000) {
+                Serial.println(F("Standard mode"));
+                mode = STANDARD_MODE;
+                setLedState(LED_STANDARD_MODE);
+            }
             break;
         case CONFIG_MODE:
             break;
         case MAINTAIN_MODE:
             if (button.pin == buttons[1].pin && pressDuration >= 5000) {
-                serial.println(F("Standard mode"));
+                Serial.println(F("Standard mode"));
                 mode = STANDARD_MODE;
                 setLedState(LED_STANDARD_MODE);
                 initSD();
@@ -133,28 +135,40 @@ void buttonPressed(Button button, unsigned short pressDuration) {
 }
 
 void logConfig() {
-    /*serial.println(F("- Config -"));
+    Serial.println(F("- Config -"));
 
-    serial.print(F("Misc - Log interval: "));
-    serial.print(config.logIntervalMin);
-    serial.print(F(", Timout: "));
-    serial.print(config.timeoutSec);
-    serial.print(F(", Max file size: "));
-    serial.println(config.fileMaxSizeKo);
+    Serial.print(F("Misc - Log interval: "));
+    Serial.print(config.logIntervalMin);
+    Serial.print(F(", Max file size: "));
+    Serial.println(config.fileMaxSizeKo);
 
-    serial.print(F("Luminosity - Enable: "));
-    serial.print(bool(config.lumSensorEnable) ? "true" : "false");
-    serial.print(F(", Low: "));
-    serial.print(config.lumSensorLow);
-    serial.print(F(", High: "));
-    serial.println(config.lumSensorHigh);
+    Serial.print(F("Luminosity - Enable: "));
+    Serial.print(bool(config.lumSensorEnable) ? "true" : "false");
+    Serial.print(F(", Low: "));
+    Serial.print(config.lumSensorLow);
+    Serial.print(F(", High: "));
+    Serial.println(config.lumSensorHigh);
 
-    serial.print(F("Temperature - Enable: "));
-    serial.print(bool(config.tempSensorEnable) ? "true" : "false");
-    serial.print(F(", Low: "));
-    serial.print(config.tempSensorLow);
-    serial.print(F(", High: "));
-    serial.println(config.tempSensorHigh);
+    Serial.print(F("Temperature - Enable: "));
+    Serial.print(bool(config.tempSensorEnable) ? "true" : "false");
+    Serial.print(F(", Low: "));
+    Serial.print(config.tempSensorLow);
+    Serial.print(F(", High: "));
+    Serial.println(config.tempSensorHigh);
 
-    serial.println(F("- End -"));*/
+    Serial.print(F("Humidity - Enable: "));
+    Serial.print(bool(config.humSensorEnable) ? "true" : "false");
+    Serial.print(F(", Low: "));
+    Serial.print(config.humSensorLow);
+    Serial.print(F(", High: "));
+    Serial.println(config.humSensorHigh);
+
+    Serial.print(F("Pressure - Enable: "));
+    Serial.print(bool(config.presSensorEnable) ? "true" : "false");
+    Serial.print(F(", Low: "));
+    Serial.print(config.pressSensorLow);
+    Serial.print(F(", High: "));
+    Serial.println(config.pressSensorHigh);
+
+    Serial.println(F("- End -"));
 }

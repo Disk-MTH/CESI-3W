@@ -5,55 +5,57 @@
 #include "Wire.h"
 
 void setup() {
-    serial.begin(9600);
+    Serial.begin(9600);
     gpsSerial.begin(9600);
     gpsSerial.listen();
-    while (!serial);
-    serial.println(F("### 3W ###"));
+    while (!Serial);
+    Serial.println(F("### 3W ###"));
 
     byte isConfigured;
     EEPROM.get(0, isConfigured);
 
-    if (isConfigured == 135) {
-        serial.println(F("Load config from EEPROM..."));
+    if (isConfigured == CONFIG_BYTE) {
+        Serial.println(F("Load config from EEPROM..."));
         EEPROM.get(1, config);
     } else {
-        serial.println(F("Create default config..."));
-        EEPROM.put(0, 135);
+        Serial.println(F("Create default config..."));
+        EEPROM.put(0, CONFIG_BYTE);
         EEPROM.put(1, config);
     }
 
     logConfig();
     Wire.begin();
 
-    serial.print(F("BUTTONS..."));
+    Serial.print(F("BUTTONS..."));
     for (auto &button: buttons)
         pinMode(button.pin, INPUT);
-    serial.println(DONE);
+    Serial.println(DONE);
+
+    Serial.print(F("LED..."));
+    led.init();
+    Serial.println(DONE);
+
+    Serial.print(F("RTC..."));
+    clock.begin();
+    clock.fillByYMD(2023, 12, 13);
+    clock.fillByHMS(10, 31, 40);
+    clock.setTime();
+    Serial.println(DONE);
+
+    Serial.print(F("BME..."));
+    if (!bme.begin())
+        Serial.println(FAILED);
+    else {
+        isBmeInit = true;
+        Serial.println(DONE);
+    }
 
     initSD();
 
-    serial.print(F("LED..."));
-    led.init();
-    serial.println(DONE);
-
-    serial.print(F("RTC..."));
-    clock.begin();
-    clock.setTime();
-    serial.println(DONE);
-
-    serial.print(F("BME..."));
-    if (!bme.begin())
-        serial.println(FAILED);
-    else {
-        isBmeInit = true;
-        serial.println(DONE);
-    }
-
-    serial.println(F("### Finish ###"));
+    Serial.println(F("### Finish ###"));
 
     if (digitalRead(buttons[1].pin) == LOW) {
-        serial.println(F("Config mode"));
+        Serial.println(F("Config mode"));
         mode = CONFIG_MODE;
         setLedState(LED_CONFIG_MODE);
     }
@@ -66,7 +68,7 @@ void loop() {
             gps = data;
     }
 
-    if (millis() - lastMillisTick > 1000) {
+    if (millis() - lastMillisTick > 0) {
         if (ledStateData[ledState].millisLeft == 0) {
             led.setColorRGB(0, ledStateData[ledState].colors[ledStateData[ledState].colorIndex].red,
                             ledStateData[ledState].colors[ledStateData[ledState].colorIndex].green,

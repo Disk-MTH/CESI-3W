@@ -1,8 +1,8 @@
 #ifndef WWW_DATA_H
 #define WWW_DATA_H
 
+#include "limits.h"
 #include "dataTypes.h"
-#include "MinimumSerial.h"
 #include "SoftwareSerial.h"
 #include "SdFat.h"
 #include "ChainableLED.h"
@@ -11,8 +11,10 @@
 
 #define DONE F("Done!")
 #define FAILED F("Failed!")
+#define NA F("N/A")
+#define SEMI F(";")
+#define CONFIG_BYTE 145
 
-extern MinimumSerial serial;
 extern SoftwareSerial gpsSerial;
 extern Button buttons[2];
 extern SdFat sd;
@@ -31,8 +33,8 @@ extern bool isBmeInit;
 extern String gps;
 extern unsigned long lastMillisTick;
 extern unsigned long lastMillisLog;
+extern unsigned long timoutMillis;
 extern unsigned long configAfkCount;
 extern bool askForPrompt;
-extern bool missingDataForLog;
 
 #endif //WWW_DATA_H

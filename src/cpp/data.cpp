@@ -1,7 +1,6 @@
 #include "headers/data.h"
 
-MinimumSerial serial;
-SoftwareSerial gpsSerial(5, 6);
+SoftwareSerial gpsSerial(6, 7);
 Button buttons[] = {
         {4},
         {5},
@@ -32,12 +31,6 @@ LedStateData ledStateData[] = {
                 new Color[2]{
                         {255, 0, 0, 500},
                         {0, 0, 255, 500}
-                }, 2
-        },
-        { // LED_GPS_ERROR
-                new Color[2]{
-                        {255, 0, 0, 500},
-                        {255, 127, 0, 500}
                 }, 2
         },
         { // LED_SENSOR_ERROR
@@ -71,6 +64,7 @@ bool isBmeInit = false;
 String gps = "";
 unsigned long lastMillisTick = 0;
 unsigned long lastMillisLog = 0;
+unsigned long timoutMillis = 0;
 unsigned long configAfkCount = 0;
 bool askForPrompt = true;
 bool missingDataForLog = false;

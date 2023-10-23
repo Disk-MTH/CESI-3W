@@ -39,11 +39,11 @@
 #endif
 
 #ifndef USE_BLOCK_DEVICE_INTERFACE
-#define USE_BLOCK_DEVICE_INTERFACE 1
+#define USE_BLOCK_DEVICE_INTERFACE 0
 #endif
 
 #ifndef FAT12_SUPPORT
-#define FAT12_SUPPORT 1
+#define FAT12_SUPPORT 0
 #endif
 
 // Backward-compatible define
@@ -61,7 +61,7 @@
 #define ENABLE_DEDICATED_SPI 0
 #define USE_LONG_FILE_NAMES 0
 #define SDFAT_FILE_TYPE 1
-//#define CHECK_FLASH_PROGRAMMING 0  // May cause SD to sleep at high current.
+// #define CHECK_FLASH_PROGRAMMING 0  // May cause SD to sleep at high current.
 //
 // Options can be set in a makefile or an IDE like platformIO
 // if they are in a #ifndef/#endif block below.

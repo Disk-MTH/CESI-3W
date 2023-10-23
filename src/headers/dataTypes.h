@@ -15,8 +15,6 @@ enum LedState {
     LED_ECO_MODE,
     LED_CONFIG_MODE,
     LED_MAINTAIN_MODE,
-    LED_RTC_ERROR,
-    LED_GPS_ERROR,
     LED_SENSOR_ERROR,
     LED_SD_ERROR,
     LED_INVALID_SENSOR_DATA,
@@ -25,7 +23,6 @@ enum LedState {
 
 struct Config {
     byte logIntervalMin = 10;
-    byte timeoutSec = 10;
     byte fileMaxSizeKo = 2;
     bool lumSensorEnable = true;
     int lumSensorLow = 255;
@@ -36,6 +33,9 @@ struct Config {
     bool humSensorEnable = true;
     int humSensorLow = 0;
     int humSensorHigh = 50;
+    bool presSensorEnable = true;
+    int pressSensorLow = 850;
+    int pressSensorHigh = 1080;
 };
 
 struct Button {
