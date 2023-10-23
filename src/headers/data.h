@@ -29,12 +29,11 @@ extern LedState ledState;
 extern LedStateData ledStateData[10];
 
 extern bool isSdInit;
-extern bool isBmeInit;
 extern String gps;
 extern unsigned long lastMillisTick;
 extern unsigned long lastMillisLog;
-extern unsigned long timoutMillis;
 extern unsigned long configAfkCount;
 extern bool askForPrompt;
+extern bool shouldLogGps;
 
 #endif //WWW_DATA_H

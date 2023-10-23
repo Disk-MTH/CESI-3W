@@ -18,7 +18,6 @@ enum LedState {
     LED_SENSOR_ERROR,
     LED_SD_ERROR,
     LED_INVALID_SENSOR_DATA,
-    LED_SD_FULL,
 };
 
 struct Config {

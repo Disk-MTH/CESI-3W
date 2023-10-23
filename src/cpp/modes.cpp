@@ -7,15 +7,20 @@ void standardMode(bool eco) {
     if (ledState != LED_STANDARD_MODE && ledState != LED_ECO_MODE)
         return;
 
-    //check if the sd is full.
+    const unsigned  long delta = millis()  - lastMillisLog;
+    const int duration = 1000;/*config.logIntervalMin * 60000 * (eco ? 2 : 1)*/
 
-
-    if (millis() - lastMillisLog > 1000/*config.logIntervalMin * 60000 * (eco ? 2 : 1)*/) {
+    if (delta > duration - 250) {
+        if (gpsSerial.available() > 0 && gps.length() == 0) {
+            const String data = gpsSerial.readStringUntil('\n');
+            if (data.startsWith("$GPGGA"))
+                gps = data;
+        }
+    }
+    if (delta > duration) {
         const String date = getRTC(true, false);
         String fileName = date;
-        fileName += "_0.csv";
-
-        Serial.println("#####");
+        fileName += "0.csv";
 
         if (logFile.open(fileName.c_str(), FILE_WRITE)) {
             if (logFile.fileSize() == 0)
@@ -23,17 +28,26 @@ void standardMode(bool eco) {
 
             logData(logFile);
 
+            if (eco)
+                shouldLogGps = !shouldLogGps;
+            else
+                shouldLogGps = true;
+
+            /*if (gps.length() == 0) {
+                if ((eco && shouldLogGps) || !eco)
+                    setLedState(LED_SENSOR_ERROR);
+            } else
+                gps = "";*/
+
             if (logFile.fileSize() > config.fileMaxSizeKo * 1024) {
                 int index = 1;
                 String newFileName = date;
-                newFileName += "_";
                 newFileName += index;
                 newFileName += ".csv";
 
                 while (sd.exists(newFileName.c_str())) {
                     index++;
                     newFileName = date;
-                    newFileName += "_";
                     newFileName += index;
                     newFileName += ".csv";
                 }
@@ -227,7 +241,7 @@ void configMode() {
 }
 
 void maintainMode() {
-    if (millis() - lastMillisLog > 1000/*config.logIntervalMin * 60000 * (eco ? 2 : 1)*/) {
+    if (millis() - lastMillisLog > config.logIntervalMin * 60000) {
         logData(Serial);
         lastMillisLog = millis();
     }

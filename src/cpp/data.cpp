@@ -60,11 +60,9 @@ LedStateData ledStateData[] = {
 };
 
 bool isSdInit = false;
-bool isBmeInit = false;
 String gps = "";
 unsigned long lastMillisTick = 0;
 unsigned long lastMillisLog = 0;
-unsigned long timoutMillis = 0;
 unsigned long configAfkCount = 0;
 bool askForPrompt = true;
-bool missingDataForLog = false;
+bool shouldLogGps = true;

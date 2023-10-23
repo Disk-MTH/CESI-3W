@@ -37,8 +37,11 @@ void logData(Print& outputStream) {
     outputStream.print(getBME(config.tempSensorEnable, config.humSensorEnable, config.presSensorEnable));
     outputStream.print(SEMI);
     outputStream.print(analogRead(A0));
-    outputStream.print(SEMI);
-    outputStream.println(gps);
+    if (shouldLogGps) {
+        outputStream.print(SEMI);
+        outputStream.print(gps);
+    } else
+        outputStream.println(NA);
 }
 
 String getRTC(bool date, bool hour) {
@@ -103,11 +106,11 @@ String getBME(bool temp, bool hum, bool pres) {
 void buttonPressed(Button button, unsigned short pressDuration) {
     switch (mode) {
         case STANDARD_MODE:
-            if (button.pin == buttons[0].pin && pressDuration >= 5000) {
+            if (button.pin == buttons[0].pin && pressDuration >= 10) {
                 Serial.println(F("Eco mode"));
                 mode = ECO_MODE;
                 setLedState(LED_ECO_MODE);
-            } else if (button.pin == buttons[1].pin && pressDuration >= 5000) {
+            } else if (button.pin == buttons[1].pin && pressDuration >= 10) {
                 Serial.println(F("Maintenance mode"));
                 mode = MAINTAIN_MODE;
                 setLedState(LED_MAINTAIN_MODE);
@@ -115,7 +118,7 @@ void buttonPressed(Button button, unsigned short pressDuration) {
             }
             break;
         case ECO_MODE:
-            if (button.pin == buttons[1].pin && pressDuration >= 5000) {
+            if (button.pin == buttons[1].pin && pressDuration >= 10) {
                 Serial.println(F("Standard mode"));
                 mode = STANDARD_MODE;
                 setLedState(LED_STANDARD_MODE);
@@ -124,7 +127,7 @@ void buttonPressed(Button button, unsigned short pressDuration) {
         case CONFIG_MODE:
             break;
         case MAINTAIN_MODE:
-            if (button.pin == buttons[1].pin && pressDuration >= 5000) {
+            if (button.pin == buttons[1].pin && pressDuration >= 10) {
                 Serial.println(F("Standard mode"));
                 mode = STANDARD_MODE;
                 setLedState(LED_STANDARD_MODE);

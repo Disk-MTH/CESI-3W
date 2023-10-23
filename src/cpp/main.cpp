@@ -43,12 +43,11 @@ void setup() {
     Serial.println(DONE);
 
     Serial.print(F("BME..."));
-    if (!bme.begin())
+    if (!bme.begin()) {
         Serial.println(FAILED);
-    else {
-        isBmeInit = true;
+        setLedState(LED_SENSOR_ERROR);
+    } else
         Serial.println(DONE);
-    }
 
     initSD();
 
@@ -62,12 +61,6 @@ void setup() {
 }
 
 void loop() {
-    if (gpsSerial.available() > 0 && gps.length() == 0) {
-        const String data = gpsSerial.readStringUntil('\n');
-        if (data.startsWith("$GPGGA"))
-            gps = data;
-    }
-
     if (millis() - lastMillisTick > 0) {
         if (ledStateData[ledState].millisLeft == 0) {
             led.setColorRGB(0, ledStateData[ledState].colors[ledStateData[ledState].colorIndex].red,
