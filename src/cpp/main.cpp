@@ -1,6 +1,6 @@
-#include "headers/data.h"
-#include "headers/modes.h"
-#include "headers/misc.h"
+#include "h/data.h"
+#include "h/modes.h"
+#include "h/misc.h"
 #include "EEPROM.h"
 #include "Wire.h"
 
@@ -37,8 +37,6 @@ void setup() {
 
     Serial.print(F("RTC..."));
     clock.begin();
-    clock.fillByYMD(2023, 12, 13);
-    clock.fillByHMS(10, 31, 40);
     clock.setTime();
     Serial.println(DONE);
 

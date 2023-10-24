@@ -1,14 +1,14 @@
-#include "headers/modes.h"
-#include "headers/data.h"
-#include "headers/misc.h"
+#include "h/modes.h"
+#include "h/data.h"
+#include "h/misc.h"
 #include "EEPROM.h"
 
 void standardMode(bool eco) {
     if (ledState != LED_STANDARD_MODE && ledState != LED_ECO_MODE)
         return;
 
-    const unsigned  long delta = millis()  - lastMillisLog;
-    const int duration = 1000;/*config.logIntervalMin * 60000 * (eco ? 2 : 1)*/
+    const unsigned long delta = millis()  - lastMillisLog;
+    const unsigned long duration = config.logIntervalMin * 60000 * (eco ? 2 : 1);
 
     if (delta > duration - 250) {
         if (gpsSerial.available() > 0 && gps.length() == 0) {
@@ -28,16 +28,15 @@ void standardMode(bool eco) {
 
             logData(logFile);
 
+            if (gps.length() == 0 && (!eco || shouldLogGps)) {
+                Serial.println(F("Invalid GPS data!"));
+                setLedState(LED_INVALID_SENSOR_DATA);
+            }
+
             if (eco)
                 shouldLogGps = !shouldLogGps;
             else
                 shouldLogGps = true;
-
-            /*if (gps.length() == 0) {
-                if ((eco && shouldLogGps) || !eco)
-                    setLedState(LED_SENSOR_ERROR);
-            } else
-                gps = "";*/
 
             if (logFile.fileSize() > config.fileMaxSizeKo * 1024) {
                 int index = 1;

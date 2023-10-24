@@ -1,5 +1,5 @@
-#include "headers/misc.h"
-#include "headers/data.h"
+#include "h/misc.h"
+#include "h/data.h"
 
 void initSD() {
     if (isSdInit) return;
@@ -37,10 +37,10 @@ void logData(Print& outputStream) {
     outputStream.print(getBME(config.tempSensorEnable, config.humSensorEnable, config.presSensorEnable));
     outputStream.print(SEMI);
     outputStream.print(analogRead(A0));
-    if (shouldLogGps) {
-        outputStream.print(SEMI);
+    outputStream.print(SEMI);
+    if (shouldLogGps)
         outputStream.print(gps);
-    } else
+    else
         outputStream.println(NA);
 }
 
@@ -67,15 +67,24 @@ String getBME(bool temp, bool hum, bool pres) {
     bme.read(presV, tempV, humV, BME280::TempUnit_Celsius, BME280::PresUnit_hPa);
     String result = "";
 
-    if (isnan(tempV) || isnan(humV) || isnan(presV))
+    if (isnan(tempV) || isnan(humV) || isnan(presV)) {
+        Serial.println(F("Failed to read BME!"));
         setLedState(LED_SENSOR_ERROR);
+    }
 
     if (!temp) {
         result += NA;
         result += SEMI;
     } else
-        if (tempV < config.tempSensorLow || tempV > config.tempSensorHigh)
+        if (tempV < config.tempSensorLow || tempV > config.tempSensorHigh) {
+            Serial.print(F("Invalid temperature! Range: "));
+            Serial.print(config.tempSensorLow);
+            Serial.print(F(" - "));
+            Serial.print(config.tempSensorHigh);
+            Serial.print(F(", value: "));
+            Serial.println(tempV);
             setLedState(LED_INVALID_SENSOR_DATA);
+        }
         else {
             result += String(tempV);
             result += SEMI;
@@ -85,8 +94,15 @@ String getBME(bool temp, bool hum, bool pres) {
         result += NA;
         result += SEMI;
     } else
-        if (humV < config.humSensorLow || humV > config.humSensorHigh)
+        if (humV < config.humSensorLow || humV > config.humSensorHigh) {
+            Serial.print(F("Invalid humidity! Range: "));
+            Serial.print(config.humSensorLow);
+            Serial.print(F(" - "));
+            Serial.print(config.humSensorHigh);
+            Serial.print(F(", value: "));
+            Serial.println(humV);
             setLedState(LED_INVALID_SENSOR_DATA);
+        }
         else {
             result += String(humV);
             result += SEMI;
@@ -95,8 +111,15 @@ String getBME(bool temp, bool hum, bool pres) {
     if (!pres)
         result += NA;
     else
-        if (presV < config.pressSensorLow || presV > config.pressSensorHigh)
+        if (presV < config.pressSensorLow || presV > config.pressSensorHigh) {
+            Serial.print(F("Invalid pressure! Range: "));
+            Serial.print(config.pressSensorLow);
+            Serial.print(F(" - "));
+            Serial.print(config.pressSensorHigh);
+            Serial.print(F(", value: "));
+            Serial.println(presV);
             setLedState(LED_INVALID_SENSOR_DATA);
+        }
         else
             result += String(presV);
 
@@ -106,11 +129,11 @@ String getBME(bool temp, bool hum, bool pres) {
 void buttonPressed(Button button, unsigned short pressDuration) {
     switch (mode) {
         case STANDARD_MODE:
-            if (button.pin == buttons[0].pin && pressDuration >= 10) {
+            if (button.pin == buttons[0].pin && pressDuration >= 5000) {
                 Serial.println(F("Eco mode"));
                 mode = ECO_MODE;
                 setLedState(LED_ECO_MODE);
-            } else if (button.pin == buttons[1].pin && pressDuration >= 10) {
+            } else if (button.pin == buttons[1].pin && pressDuration >= 5000) {
                 Serial.println(F("Maintenance mode"));
                 mode = MAINTAIN_MODE;
                 setLedState(LED_MAINTAIN_MODE);
@@ -118,7 +141,7 @@ void buttonPressed(Button button, unsigned short pressDuration) {
             }
             break;
         case ECO_MODE:
-            if (button.pin == buttons[1].pin && pressDuration >= 10) {
+            if (button.pin == buttons[1].pin && pressDuration >= 5000) {
                 Serial.println(F("Standard mode"));
                 mode = STANDARD_MODE;
                 setLedState(LED_STANDARD_MODE);
@@ -127,7 +150,7 @@ void buttonPressed(Button button, unsigned short pressDuration) {
         case CONFIG_MODE:
             break;
         case MAINTAIN_MODE:
-            if (button.pin == buttons[1].pin && pressDuration >= 10) {
+            if (button.pin == buttons[1].pin && pressDuration >= 5000) {
                 Serial.println(F("Standard mode"));
                 mode = STANDARD_MODE;
                 setLedState(LED_STANDARD_MODE);

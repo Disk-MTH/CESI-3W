@@ -13,7 +13,7 @@
 #define FAILED F("Failed!")
 #define NA F("N/A")
 #define SEMI F(";")
-#define CONFIG_BYTE 145
+#define CONFIG_BYTE 146
 
 extern SoftwareSerial gpsSerial;
 extern Button buttons[2];

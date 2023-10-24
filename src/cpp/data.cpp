@@ -1,4 +1,4 @@
-#include "headers/data.h"
+#include "h/data.h"
 
 SoftwareSerial gpsSerial(6, 7);
 Button buttons[] = {
