@@ -112,7 +112,10 @@ void configMode() {
             setLedState(LED_STANDARD_MODE);
             isConfigCommand = false;
         } else if (command.startsWith(F("VERSION"))) {
-            Serial.println(F("3W v1.0.0"));
+            Serial.print(F("3W v"));
+            Serial.println(VERSION);
+            Serial.print(F("Lot number: "));
+            Serial.println(LOT_ID);
             isConfigCommand = false;
         } else if (command.startsWith((F("RESET")))) {
             Serial.println(F("Resetting config"));

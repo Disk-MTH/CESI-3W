@@ -14,6 +14,8 @@
 #define NA F("N/A")
 #define SEMI F(";")
 #define CONFIG_BYTE 146
+#define VERSION 1
+#define LOT_ID 0
 
 extern SoftwareSerial gpsSerial;
 extern Button buttons[2];
