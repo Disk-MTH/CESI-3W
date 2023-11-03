@@ -14,12 +14,12 @@ void setup() {
     byte isConfigured;
     EEPROM.get(0, isConfigured);
 
-    if (isConfigured == CONFIG_BYTE) {
+    if (isConfigured == EEPROM_FLAG) {
         Serial.println(F("Load config from EEPROM..."));
         EEPROM.get(1, config);
     } else {
         Serial.println(F("Create default config..."));
-        EEPROM.put(0, CONFIG_BYTE);
+        EEPROM.put(0, EEPROM_FLAG);
         EEPROM.put(1, config);
     }
 

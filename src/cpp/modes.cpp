@@ -232,7 +232,7 @@ void configMode() {
         } else
             invalidSyntax = true;
         if (isConfigCommand && !invalidSyntax && !invalidValue) {
-            EEPROM.update(0, CONFIG_BYTE);
+            EEPROM.update(0, EEPROM_FLAG);
             EEPROM.put(1, config);
             logConfig();
         } else if (invalidSyntax)

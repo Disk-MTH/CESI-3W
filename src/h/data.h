@@ -13,9 +13,9 @@
 #define FAILED F("Failed!")
 #define NA F("N/A")
 #define SEMI F(";")
-#define CONFIG_BYTE 0
-#define VERSION F("0")
-#define LOT_ID F("0")
+#define EEPROM_FLAG 134
+#define VERSION F("1.0")
+#define LOT_ID F("28328612a533b6907687")
 
 extern SoftwareSerial gpsSerial;
 extern Button buttons[2];
