@@ -37,7 +37,6 @@ void setup() {
 
     Serial.print(F("RTC..."));
     clock.begin();
-    clock.setTime();
     Serial.println(DONE);
 
     Serial.print(F("BME..."));

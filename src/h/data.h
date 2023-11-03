@@ -13,9 +13,9 @@
 #define FAILED F("Failed!")
 #define NA F("N/A")
 #define SEMI F(";")
-#define CONFIG_BYTE 146
-#define VERSION 1
-#define LOT_ID 0
+#define CONFIG_BYTE 0
+#define VERSION F("0")
+#define LOT_ID F("0")
 
 extern SoftwareSerial gpsSerial;
 extern Button buttons[2];

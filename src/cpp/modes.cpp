@@ -114,7 +114,7 @@ void configMode() {
         } else if (command.startsWith(F("VERSION"))) {
             Serial.print(F("3W v"));
             Serial.println(VERSION);
-            Serial.print(F("Lot number: "));
+            Serial.print(F("Lot id: "));
             Serial.println(LOT_ID);
             isConfigCommand = false;
         } else if (command.startsWith((F("RESET")))) {
