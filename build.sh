@@ -142,12 +142,6 @@ else
     exit 1
 fi
 
-if ! command -v py > /dev/null 2>&1; then
-  error "Python is not installed on your system"
-  error "Please install it from https://www.python.org"
-  exit 1
-fi
-
 if ! command -v pio > /dev/null 2>&1; then
   error "PlatformIO is not installed on your system"
   error "Please install it from https://docs.platformio.org/en/latest/core/installation/methods/installer-script.html"

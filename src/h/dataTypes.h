@@ -31,7 +31,7 @@ struct Config {
     int tempSensorHigh = 60;
     bool humSensorEnable = true;
     int humSensorLow = 0;
-    int humSensorHigh = 75;
+    int humSensorHigh = 100;
     bool presSensorEnable = true;
     int pressSensorLow = 850;
     int pressSensorHigh = 1080;
