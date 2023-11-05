@@ -154,7 +154,7 @@ if [ "$mode" = "compile" ]; then
 elif [ "$mode" = "upload" ]; then
     pio run -t upload
 elif [ "$mode" = "monitor" ]; then
-    pio pio run -t upload -t monitor
+    pio run -t upload -t monitor
 fi
 
 read -p -r "Press enter to exit"
