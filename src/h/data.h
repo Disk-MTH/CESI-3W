@@ -15,7 +15,7 @@
 #define SEMI F(";")
 #define EEPROM_FLAG 134
 #define VERSION F("1.0")
-#define LOT_ID F("6b238fc4284410a81be8")
+#define LOT_ID F("64d2039e87005ca76307")
 
 extern SoftwareSerial gpsSerial;
 extern Button buttons[2];

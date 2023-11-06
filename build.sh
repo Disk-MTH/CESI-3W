@@ -44,6 +44,8 @@ function log_execution {
   } | while IFS= read -r line; do
     formattedPrint "Exec: $line"
   done
+
+  log "Execution of \"$1\" finished"
 }
 
 #####                   Main                      #####
@@ -162,8 +164,8 @@ if [ "$mode" = "compile" ]; then
 elif [ "$mode" = "upload" ]; then
     log_execution "pio run -t upload"
 elif [ "$mode" = "monitor" ]; then
-    log_execution "pio run -t upload -t monitor"
+    log_execution "pio run -t upload"
+    log_execution "pio device monitor -f send_on_enter"
 fi
 
-log "Build finished"
 read -rp "Press enter to exit"
