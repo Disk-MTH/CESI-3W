@@ -91,14 +91,7 @@ void configMode() {
     }
 
     if (Serial.available() > 0) {
-        String command;
-        while (Serial.available() > 0) {
-            char c = (char) Serial.read();
-            if (c == '\n' || c == '\r')
-                break;
-            command += c;
-        }
-
+        const String command = Serial.readStringUntil('\n');
         Serial.println(command);
         configAfkCount = 0;
         askForPrompt = true;
