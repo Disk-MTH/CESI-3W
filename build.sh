@@ -38,6 +38,14 @@ function error {
   formattedPrint "Error: $1" "$RED"
 }
 
+function log_execution {
+  {
+    $1 2>&1 | tee -a "$LOG_FILE"
+  } | while IFS= read -r line; do
+    formattedPrint "Exec: $line"
+  done
+}
+
 #####                   Main                      #####
 
 log "####################"
@@ -150,11 +158,12 @@ fi
 
 log "Starting to build the project in \"$mode\" mode"
 if [ "$mode" = "compile" ]; then
-    pio run
+    log_execution "pio run"
 elif [ "$mode" = "upload" ]; then
-    pio run -t upload
+    log_execution "pio run -t upload"
 elif [ "$mode" = "monitor" ]; then
-    pio run -t upload -t monitor
+    log_execution "pio run -t upload -t monitor"
 fi
 
-read -p -r "Press enter to exit"
+log "Build finished"
+read -rp "Press enter to exit"
